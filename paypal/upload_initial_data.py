@@ -2,6 +2,7 @@ import argparse
 import pathlib
 
 import pandas as pd
+
 from common.convert_currency import convert_currency
 from common.write_df_to_collection import write_df_to_collection
 
@@ -38,7 +39,7 @@ def process_file_to_df(input_file_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_file_path", type=pathlib.Path, required=True)
-    parser.add_argument("-o", "--donation_source", type=str, required=False)
+    parser.add_argument("-d", "--donation_source", type=str, default="PayPal", required=False)
     args = parser.parse_args()
     df = process_file_to_df(args.input_file_path)
     write_df_to_collection(df, args.donation_source, "Manual")
