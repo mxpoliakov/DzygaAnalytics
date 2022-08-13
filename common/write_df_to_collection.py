@@ -20,6 +20,5 @@ def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"
             "insertionMode": insertion_mode,
         }
         rows_to_insert.append(row_insert)
-        print(row_insert)
 
     conn.get_collection("donations").insert_many(rows_to_insert)

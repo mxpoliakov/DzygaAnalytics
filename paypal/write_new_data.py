@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 from datetime import datetime
 
 import pandas as pd
@@ -83,18 +82,21 @@ def get_paypal_api_data(access_token, last_document_datetime):
     return df, current_datetime
 
 
+def write_new_data(creds_key, donation_source="PayPal"):
+    access_token = get_access_token(creds_key)
+    last_document_datetime = get_last_document_datetime(donation_source)
+    df, current_datetime = get_paypal_api_data(access_token, last_document_datetime)
+    if not df.empty:
+        write_df_to_collection(df, donation_source, "Auto")
+        print(f"{last_document_datetime} - {current_datetime} | Wrote {len(df)} rows")
+    else:
+        print(f"{last_document_datetime} - {current_datetime} | No data")
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--creds_key", type=str, required=True)
     parser.add_argument("-d", "--donation_source", type=str, default="PayPal", required=False)
     args = parser.parse_args()
-    logging.basicConfig(filename=f"logs/log_{args.donation_source}.txt", level=logging.INFO)
-    access_token = get_access_token(args.creds_key)
-    last_document_datetime = get_last_document_datetime(args.donation_source)
-    df, current_datetime = get_paypal_api_data(access_token, last_document_datetime)
-    if not df.empty:
-        write_df_to_collection(df, args.donation_source, "Auto")
-        logging.info(f"{last_document_datetime} - {current_datetime} | Wrote {len(df)} rows")
-    else:
-        logging.info(f"{last_document_datetime} - {current_datetime} | No data")
+    write_new_data(args.creds_key, args.donation_source)
