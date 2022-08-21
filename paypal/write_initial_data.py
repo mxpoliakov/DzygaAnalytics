@@ -14,11 +14,11 @@ def convert_currency_str(col):
 def process_file_to_df(input_file_path):
     df = pd.read_csv(input_file_path)
     df["Datetime"] = pd.to_datetime(df[["Date", "Time", "TimeZone"]].agg(" ".join, axis=1), dayfirst=True)
-    df = df.drop(["Date", "Time", "TimeZone"], axis=1)
+    df["Email"] = df["From Email Address"]
+    df = df.drop(["Date", "Time", "TimeZone", "From Email Address", "Contact Phone Number"], axis=1)
     print(f"Parsing {input_file_path} from {df.iloc[0].Datetime} to {df.iloc[-1].Datetime}")
     df["Balance"] = convert_currency_str(df["Balance"])
     df["Net"] = convert_currency_str(df["Net"])
-    df["Gross"] = convert_currency_str(df["Gross"])
 
     df = df[
         (df["Balance Impact"] == "Credit")
@@ -28,11 +28,13 @@ def process_file_to_df(input_file_path):
 
     df["Note"] = df["Note"].fillna("")
     df = df.drop(df.nunique()[df.nunique() == 1].index, axis=1)
+    df["Original Sum"] = df["Net"]
     net = df.apply(
         lambda row: convert_currency(row["Net"], row["Currency"], row["Datetime"]),
         axis=1,
     )
-    df["Net"] = round(net, 2)
+    df["Converted Sum"] = round(net, 2)
+    df = df.drop(["Balance", "Gross", "Net", "Transaction ID", "Type"], axis=1)
     return df
 
 

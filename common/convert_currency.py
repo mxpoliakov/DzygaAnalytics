@@ -6,7 +6,7 @@ currency_converter_intance = None
 def convert_currency(value, currency, date):
     global currency_converter_intance
     currency_converter_intance = (
-        CurrencyConverter(ECB_URL, fallback_on_missing_rate=True)
+        CurrencyConverter(ECB_URL, fallback_on_missing_rate=True, fallback_on_wrong_date=True)
         if currency_converter_intance is None
         else currency_converter_intance
     )

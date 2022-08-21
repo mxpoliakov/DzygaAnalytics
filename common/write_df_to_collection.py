@@ -11,10 +11,10 @@ def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"
         row_insert = {
             "donationSource": donation_source,
             "senderName": row["Name"],
-            "senderEmail": row["From Email Address"],
+            "senderEmail": row["Email"],
             "currency": row["Currency"],
-            "amountUSD": row["Net"],
-            "amountOriginal": row["Gross"],
+            "amountUSD": row["Converted Sum"],
+            "amountOriginal": row["Original Sum"],
             "senderNote": row["Note"],
             "datetime": row["Datetime"].to_pydatetime(),
             "insertionMode": insertion_mode,
