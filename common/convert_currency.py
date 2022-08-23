@@ -1,4 +1,5 @@
-from currency_converter import ECB_URL, CurrencyConverter
+from currency_converter import ECB_URL
+from currency_converter import CurrencyConverter
 
 currency_converter_intance = None
 
