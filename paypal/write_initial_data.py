@@ -13,7 +13,9 @@ def convert_currency_str(col):
 
 def process_file_to_df(input_file_path):
     df = pd.read_csv(input_file_path)
-    df["Datetime"] = pd.to_datetime(df[["Date", "Time", "TimeZone"]].agg(" ".join, axis=1), dayfirst=True)
+    df["Datetime"] = pd.to_datetime(
+        df[["Date", "Time", "TimeZone"]].agg(" ".join, axis=1), dayfirst=True
+    )
     df["Email"] = df["From Email Address"]
     df = df.drop(["Date", "Time", "TimeZone", "From Email Address", "Contact Phone Number"], axis=1)
     print(f"Parsing {input_file_path} from {df.iloc[0].Datetime} to {df.iloc[-1].Datetime}")

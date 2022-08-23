@@ -14,7 +14,9 @@ def write_new_data(creds_key, donation_source="Monobank"):
     current_datetime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     if not df.empty:
         write_df_to_collection(df, donation_source, insertion_mode="Auto")
-        print(f"{last_document_datetime} - {current_datetime} | {donation_source} | Wrote {len(df)} rows")
+        print(
+            f"{last_document_datetime} - {current_datetime} | {donation_source} | Wrote {len(df)} rows"
+        )
     else:
         print(f"{last_document_datetime} - {current_datetime} | {donation_source} | No data")
 

@@ -57,7 +57,9 @@ def get_paypal_api_data(access_token, last_document_datetime):
         if code in ["T0000", "T0011"] and net > 0:
             payer_info = transaction["payer_info"]
             currency = transaction_info["transaction_amount"]["currency_code"]
-            transaction_dt = datetime.fromisoformat(transaction_info["transaction_initiation_date"].split("+")[0])
+            transaction_dt = datetime.fromisoformat(
+                transaction_info["transaction_initiation_date"].split("+")[0]
+            )
             rows.append(
                 {
                     "Name": payer_info["payer_name"]["alternate_full_name"],
@@ -79,7 +81,9 @@ def write_new_data(creds_key, donation_source="PayPal"):
     df, current_datetime = get_paypal_api_data(access_token, last_document_datetime)
     if not df.empty:
         write_df_to_collection(df, donation_source, "Auto")
-        print(f"{last_document_datetime} - {current_datetime} | {donation_source} | Wrote {len(df)} rows")
+        print(
+            f"{last_document_datetime} - {current_datetime} | {donation_source} | Wrote {len(df)} rows"
+        )
     else:
         print(f"{last_document_datetime} - {current_datetime} | {donation_source} | No data")
 
