@@ -4,6 +4,7 @@ import pathlib
 import pandas as pd
 
 from common.convert_currency import convert_currency
+from common.convert_currency import get_currency_converter_intance
 from common.write_df_to_collection import write_df_to_collection
 
 
@@ -31,8 +32,11 @@ def process_file_to_df(input_file_path):
     df["Note"] = df["Note"].fillna("")
     df = df.drop(df.nunique()[df.nunique() == 1].index, axis=1)
     df["Original Sum"] = df["Net"]
+    currency_converter_intance = get_currency_converter_intance()
     net = df.apply(
-        lambda row: convert_currency(row["Net"], row["Currency"], row["Datetime"]),
+        lambda row: convert_currency(
+            currency_converter_intance, row["Net"], row["Currency"], row["Datetime"]
+        ),
         axis=1,
     )
     df["Converted Sum"] = round(net, 2)
@@ -45,5 +49,5 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input_file_path", type=pathlib.Path, required=True)
     parser.add_argument("-d", "--donation_source", type=str, default="PayPal", required=False)
     args = parser.parse_args()
-    df = process_file_to_df(args.input_file_path)
-    write_df_to_collection(df, args.donation_source, "Manual")
+    df_processed = process_file_to_df(args.input_file_path)
+    write_df_to_collection(df_processed, args.donation_source, "Manual")

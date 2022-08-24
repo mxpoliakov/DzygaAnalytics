@@ -22,12 +22,11 @@ jobs:
           requirementsFiles: "requirements.txt requirements-dev.txt"
   pylint:
     runs-on: ubuntu-latest
-    name: Checks
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.10
     - run: pip install --upgrade pip
     - run: pip install -r requirements-dev.txt
     - run: pylint $(git ls-files '*.py')
