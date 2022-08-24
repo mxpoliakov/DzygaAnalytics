@@ -5,7 +5,7 @@ import pandas as pd
 
 from common.convert_currency import convert_currency
 from common.convert_currency import get_currency_converter_intance
-from common.write_df_to_collection import write_df_to_collection
+from common.mongo import write_df_to_collection
 
 
 def convert_currency_str(col):
