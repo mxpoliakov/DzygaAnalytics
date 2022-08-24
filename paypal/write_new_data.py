@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 
 import pandas as pd
@@ -6,18 +7,17 @@ import requests
 
 from common.convert_currency import convert_currency
 from common.convert_currency import get_currency_converter_intance
-from common.get_creds import get_creds
-from common.get_last_document_datetime import get_last_document_datetime
-from common.write_df_to_collection import write_df_to_collection_with_logs
+from common.mongo import get_last_document_datetime
+from common.mongo import write_df_to_collection_with_logs
 
 PAYPAL_ENDPOINT_URL = "https://api-m.paypal.com/v1"
+MAX_PAYPAL_TRANSACTIONS = 500
 
 
 def get_access_token(creds_key):
-    paypal_creds = get_creds()[creds_key]
     response = requests.post(
         f"{PAYPAL_ENDPOINT_URL}/oauth2/token",
-        auth=(paypal_creds["client_id"], paypal_creds["client_secret"]),
+        auth=(os.environ[f"{creds_key}_CLIENT_ID"], os.environ[f"{creds_key}_SECRET_ID"]),
         headers={"Accept": "application/json", "Accept-Language": "en_US"},
         data={"grant_type": "client_credentials"},
     ).json()
@@ -37,12 +37,12 @@ def get_paypal_api_data(access_token, last_document_datetime):
         params={
             "start_date": last_document_datetime,
             "end_date": current_datetime,
-            "page_size": 500,
+            "page_size": MAX_PAYPAL_TRANSACTIONS,
             "transaction_status": "S",
             "fields": ",".join(["transaction_info", "payer_info"]),
         },
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes["ok"], response.text
     response = json.loads(response.text)
 
     rows = []

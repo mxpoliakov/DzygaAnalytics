@@ -1,0 +1,27 @@
+name: Python Test
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    types: [opened, synchronize, reopened]
+env:
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  PAYPAL_DIMKO_CLIENT_ID: ${{ secrets.PAYPAL_DIMKO_CLIENT_ID }}
+  PAYPAL_DIMKO_SECRET_ID: ${{ secrets.PAYPAL_DIMKO_SECRET_ID }}
+  PAYPAL_ROMAN_CLIENT_ID: ${{ secrets.PAYPAL_ROMAN_CLIENT_ID }}
+  PAYPAL_ROMAN_SECRET_ID: ${{ secrets.PAYPAL_ROMAN_SECRET_ID }}
+  MONO_JAR_DIMKO_X_TOKEN: ${{ secrets.MONO_JAR_DIMKO_X_TOKEN }}
+  MONO_JAR_DIMKO_ACCOUNT_ID: ${{ secrets.MONO_JAR_DIMKO_ACCOUNT_ID }}
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.10.6
+    - run: pip install --upgrade pip
+    - run: pip install -r requirements-dev.txt
+    - run: echo "PYTHONPATH=/home/runner/work/DzygaAnalytics/DzygaAnalytics" >> $GITHUB_ENV
+    - run: pytest .

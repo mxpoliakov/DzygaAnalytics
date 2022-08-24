@@ -1,6 +1,13 @@
-from pymongo import MongoClient
+import os
 
-from common.get_creds import get_creds
+from pymongo import DESCENDING
+from pymongo import MongoClient
+from pymongo.collection import Collection
+
+
+def get_collection() -> Collection:
+    connection = MongoClient(os.environ["MONGO_URI"])["AppDB"]
+    return connection.get_collection("donations")
 
 
 def write_df_to_collection_with_logs(
@@ -15,8 +22,6 @@ def write_df_to_collection_with_logs(
 
 
 def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"):
-    client = MongoClient(get_creds()["mongo"]["uri"])
-    conn = client["AppDB"]
     rows_to_insert = []
     for _, row in df.iterrows():
         row_insert = {
@@ -32,4 +37,17 @@ def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"
         }
         rows_to_insert.append(row_insert)
 
-    conn.get_collection("donations").insert_many(rows_to_insert)
+    get_collection().insert_many(rows_to_insert)
+
+
+def get_last_document_datetime(donation_source, convert_to_str=True):
+    last_document = get_collection().find_one(
+        {"donationSource": donation_source}, sort=[("datetime", DESCENDING)]
+    )
+    if last_document is None:
+        raise ValueError(f"No data is in the collection for source {donation_source}")
+
+    if convert_to_str:
+        return last_document["datetime"].strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return last_document["datetime"]

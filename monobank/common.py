@@ -1,17 +1,17 @@
 import json
+import os
 from datetime import datetime
 
 import pandas as pd
 import requests
 
-from common.get_creds import get_creds
-
 MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
+UAH_CODE = 980
+USD_CODE = 840
 
 
 def get_access_token_and_account_id(creds_key):
-    monobank_creds = get_creds()[creds_key]
-    return monobank_creds["x_token"], monobank_creds["account_id"]
+    return os.environ[f"{creds_key}_X_TOKEN"], os.environ[f"{creds_key}_ACCOUNT_ID"]
 
 
 def get_usd_to_uah_current_rate():
@@ -19,11 +19,11 @@ def get_usd_to_uah_current_rate():
         f"{MONOBANK_ENDPOINT_URL}/bank/currency",
         headers={"Content-Type": "application/json"},
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes["ok"], response.text
     response = json.loads(response.text)
 
     for rate_info in response:
-        if rate_info["currencyCodeA"] == 840 and rate_info["currencyCodeB"] == 980:
+        if rate_info["currencyCodeA"] == USD_CODE and rate_info["currencyCodeB"] == UAH_CODE:
             return rate_info["rateSell"]
     return None
 
@@ -38,7 +38,7 @@ def get_monobank_api_data(access_token, account_id, start_datetime, end_datetime
         url,
         headers={"Content-Type": "application/json", "X-Token": access_token},
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes["ok"], response.text
     response = json.loads(response.text)
 
     rows = []
@@ -58,8 +58,7 @@ def get_monobank_api_data(access_token, account_id, start_datetime, end_datetime
             except IndexError:
                 name = "🐈"
 
-            amount = transaction["amount"] / 100
-            assert transaction["currencyCode"] == 980, "Only UAH accounts are supported"
+            assert transaction["currencyCode"] == UAH_CODE, "Only UAH accounts are supported"
             rows.append(
                 {
                     "Name": name if name != "🐈" else None,
