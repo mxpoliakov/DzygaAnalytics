@@ -15,5 +15,5 @@ def get_last_document_datetime(donation_source, convert_to_str=True):
 
     if convert_to_str:
         return last_document["datetime"].strftime("%Y-%m-%dT%H:%M:%SZ")
-    else:
-        return last_document["datetime"]
+
+    return last_document["datetime"]
