@@ -2,8 +2,8 @@ from datetime import datetime
 
 from common.mongo import get_last_document_datetime
 from common.mongo import write_df_to_collection_with_logs
-from monobank.monobank_common import get_access_token_and_account_id
-from monobank.monobank_common import get_monobank_api_data
+from monobank.common import get_access_token_and_account_id
+from monobank.common import get_monobank_api_data
 
 
 def write_new_data(creds_key, donation_source="Monobank"):

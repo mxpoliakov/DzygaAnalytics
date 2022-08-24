@@ -2,8 +2,8 @@ import json
 
 import requests
 
-from monobank.monobank_common import MONOBANK_ENDPOINT_URL
-from monobank.monobank_common import get_access_token_and_account_id
+from monobank.common import MONOBANK_ENDPOINT_URL
+from monobank.common import get_access_token_and_account_id
 
 
 def test_get_access_token():

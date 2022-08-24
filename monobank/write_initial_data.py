@@ -2,8 +2,8 @@ import argparse
 from datetime import datetime
 
 from common.mongo import write_df_to_collection
-from monobank.monobank_common import get_access_token_and_account_id
-from monobank.monobank_common import get_monobank_api_data
+from monobank.common import get_access_token_and_account_id
+from monobank.common import get_monobank_api_data
 
 if __name__ == "__main__":
 
