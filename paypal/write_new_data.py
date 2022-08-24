@@ -42,7 +42,7 @@ def get_paypal_api_data(access_token, last_document_datetime):
             "fields": ",".join(["transaction_info", "payer_info"]),
         },
     )
-    assert response.status_code == requests.codes.ok, response.text
+    assert response.status_code == requests.codes["ok"], response.text
     response = json.loads(response.text)
 
     rows = []
