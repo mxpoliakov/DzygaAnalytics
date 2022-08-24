@@ -18,5 +18,6 @@ jobs:
     - run: pip install --upgrade pip
     - run: pip install -r requirements-dev.txt
     - run: echo "PYTHONPATH=home/runner/work/DzygaAnalytics/DzygaAnalytics" >> $GITHUB_ENV
+    - run: echo "${{ env.PYTHONPATH }}"
     - run: pytest --import-mode=append tests/
   
