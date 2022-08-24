@@ -5,6 +5,9 @@ on:
       - 'main'
   pull_request:
     types: [opened, synchronize, reopened]
+env:
+    PYTHONPATH: home/runner/work/DzygaAnalytics/DzygaAnalytics
+    MONGO_URI: ${{ secrets.MONGO_URI }}
 jobs:
   pytest:
     runs-on: ubuntu-latest
@@ -16,6 +19,4 @@ jobs:
     - run: pip install --upgrade pip
     - run: pip install -r requirements-dev.txt
     - run: pytest .
-    env:
-      PYTHONPATH: home/runner/work/DzygaAnalytics/DzygaAnalytics
-      MONGO_URI: ${{ secrets.MONGO_URI }}
+  
