@@ -23,4 +23,3 @@ jobs:
     - run: pip install -r requirements-dev.txt
     - run: echo "PYTHONPATH=/home/runner/work/DzygaAnalytics/DzygaAnalytics" >> $GITHUB_ENV
     - run: pytest .
-  

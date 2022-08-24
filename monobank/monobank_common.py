@@ -19,7 +19,7 @@ def get_usd_to_uah_current_rate():
         f"{MONOBANK_ENDPOINT_URL}/bank/currency",
         headers={"Content-Type": "application/json"},
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes.ok, response.text
     response = json.loads(response.text)
 
     for rate_info in response:
@@ -38,7 +38,7 @@ def get_monobank_api_data(access_token, account_id, start_datetime, end_datetime
         url,
         headers={"Content-Type": "application/json", "X-Token": access_token},
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes.ok, response.text
     response = json.loads(response.text)
 
     rows = []

@@ -11,6 +11,7 @@ from common.mongo import get_last_document_datetime
 from common.mongo import write_df_to_collection_with_logs
 
 PAYPAL_ENDPOINT_URL = "https://api-m.paypal.com/v1"
+MAX_PAYPAL_TRANSACTIONS = 500
 
 
 def get_access_token(creds_key):
@@ -36,12 +37,12 @@ def get_paypal_api_data(access_token, last_document_datetime):
         params={
             "start_date": last_document_datetime,
             "end_date": current_datetime,
-            "page_size": 500,
+            "page_size": MAX_PAYPAL_TRANSACTIONS,
             "transaction_status": "S",
             "fields": ",".join(["transaction_info", "payer_info"]),
         },
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == requests.codes.ok, response.text
     response = json.loads(response.text)
 
     rows = []
