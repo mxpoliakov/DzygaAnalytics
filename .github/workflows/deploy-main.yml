@@ -13,7 +13,7 @@ jobs:
       - uses: MajorScruffy/delete-old-workflow-runs@v0.1.0
         with:
           repository: mxpoliakov/DzygaAnalytics
-          older-than-seconds: 0
+          older-than-seconds: 1
           event: pull_request
           what-if: true
         env:
