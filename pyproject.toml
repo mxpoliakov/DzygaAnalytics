@@ -10,4 +10,4 @@ force_single_line = true
 disable = [
   "missing-docstring",
 ]
-good-names = ["i", "j", "k", "f", "ex", "df"]
+good-names = ["i", "j", "k", "f", "ex", "df", "db"]
