@@ -28,7 +28,9 @@ def write_df_to_collection_with_logs(
         print(f"{base_str} | No data")
 
 
-def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"):
+def write_df_to_collection(
+    df, collection_name=get_collection_name(), donation_source="PayPal", insertion_mode="Manual"
+):
     rows_to_insert = []
     for _, row in df.iterrows():
         row_insert = {
@@ -44,7 +46,7 @@ def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"
         }
         rows_to_insert.append(row_insert)
 
-    get_collection().insert_many(rows_to_insert)
+    get_collection(collection_name).insert_many(rows_to_insert)
 
 
 def get_last_document_datetime(donation_source, convert_to_str=True):

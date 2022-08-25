@@ -1,0 +1,7 @@
+Name,Currency,Note,Datetime,Email,Original Sum,Converted Sum
+Fake A Name,USD,Note 1,2022-04-02 13:51:00+03:00,mail1@mail.com,50.0,50.0
+Fake B Name,USD,Note 2,2022-04-02 17:40:20+03:00,mail2@mail.com,20.12,20.12
+Fake Corp Inc.,EUR,Note 3,2022-05-11 19:10:02+03:00, mail3@mail.com,100.0,104.08
+Fake Surname,EUR,Note 4,2022-05-12 12:35:33+03:00,mail4@mail.com,16.12,16.74
+Test Surname,USD,"",2022-08-01 11:48:56+03:00,mail5@mail.com,10.0,10.0
+,UAH,Note 5,2022-08-02 10:15:50+03:00,,1.0,40.0
