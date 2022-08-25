@@ -3,11 +3,18 @@ import os
 from pymongo import DESCENDING
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.database import Database
+
+from common.config import get_collection_name
+from common.config import get_db_name
 
 
-def get_collection() -> Collection:
-    connection = MongoClient(os.environ["MONGO_URI"])["AppDB"]
-    return connection.get_collection("donations")
+def get_database() -> Database:
+    return MongoClient(os.environ["MONGO_URI"])[get_db_name()]
+
+
+def get_collection(collection_name=get_collection_name()) -> Collection:
+    return get_database().get_collection(collection_name)
 
 
 def write_df_to_collection_with_logs(

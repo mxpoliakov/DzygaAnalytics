@@ -1,0 +1,18 @@
+version: 2.1
+
+mongo:
+  db: AppDB
+  collection: donations
+sources:
+  - 
+    name: Dimko's PayPal
+    type: PayPal
+    creds_key: PAYPAL_DIMKO
+  - 
+    name: Roman's PayPal
+    type: PayPal
+    creds_key: PAYPAL_ROMAN
+  - 
+    name: Dzyga's Paw Jar
+    type: Monobank
+    creds_key: MONO_JAR_DIMKO
