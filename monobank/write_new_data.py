@@ -11,7 +11,10 @@ def write_new_data(creds_key, donation_source="Monobank"):
     last_document_datetime = get_last_document_datetime(donation_source, convert_to_str=False)
     df = get_monobank_api_data(access_token, account_id, last_document_datetime)
 
-    current_datetime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     write_df_to_collection_with_logs(
-        df, last_document_datetime, current_datetime, donation_source, "Auto"
+        df,
+        last_document_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        donation_source=donation_source,
+        insertion_mode="Auto",
     )

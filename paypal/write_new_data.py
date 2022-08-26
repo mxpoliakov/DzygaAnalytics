@@ -84,5 +84,9 @@ def write_new_data(creds_key, donation_source="PayPal"):
     last_document_datetime = get_last_document_datetime(donation_source)
     df, current_datetime = get_paypal_api_data(access_token, last_document_datetime)
     write_df_to_collection_with_logs(
-        df, last_document_datetime, current_datetime, donation_source, "Auto"
+        df,
+        last_document_datetime,
+        current_datetime,
+        donation_source=donation_source,
+        insertion_mode="Auto",
     )

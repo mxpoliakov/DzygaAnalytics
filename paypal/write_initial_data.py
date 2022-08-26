@@ -50,4 +50,6 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--donation_source", type=str, default="PayPal", required=False)
     args = parser.parse_args()
     df_processed = process_file_to_df(args.input_file_path)
-    write_df_to_collection(df_processed, args.donation_source, "Manual")
+    write_df_to_collection(
+        df_processed, donation_source=args.donation_source, insertion_mode="Manual"
+    )

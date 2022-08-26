@@ -1,25 +1,15 @@
-import json
-
-import requests
+from datetime import datetime
 
 from common.config import get_creds_keys_list
-from monobank.common import MONOBANK_ENDPOINT_URL
 from monobank.common import get_access_token_and_account_id
+from monobank.common import get_monobank_api_data
 
 
-def test_get_access_token():
+def test_get_monobank_api_data():
     creds_key = get_creds_keys_list("Monobank").pop()
     access_token, account_id = get_access_token_and_account_id(creds_key)
-    response = requests.get(
-        f"{MONOBANK_ENDPOINT_URL}/personal/client-info",
-        headers={"Content-Type": "application/json", "X-Token": access_token},
-    )
-    assert response.status_code == requests.codes["ok"], response.text
-    response = json.loads(response.text)
-
-    account_title = None
-    for jar in response["jars"]:
-        if jar["id"] == account_id:
-            account_title = jar["title"]
-
-    assert account_title == "Dzyga’s Paw 🐾"
+    start_datetime = datetime(2022, 7, 1)
+    end_datetime = datetime(2022, 8, 1)
+    df = get_monobank_api_data(access_token, account_id, start_datetime, end_datetime)
+    assert len(df) == 3
+    assert df["Original Sum"].sum() == 7500
