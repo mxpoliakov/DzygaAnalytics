@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -11,6 +12,7 @@ from common.mongo import get_collection
 from common.mongo import get_database
 from common.mongo import get_last_document_datetime
 from common.mongo import write_df_to_collection
+from common.mongo import write_df_to_collection_with_logs
 from mongo.enforce_schema import enforce_schema
 
 
@@ -25,10 +27,17 @@ def test_get_last_document_datetime(convert_to_str, donation_source):
     assert isinstance(last_document_datetime, str if convert_to_str else datetime)
 
 
-def test_write_df_to_collection():
+def test_get_last_document_datetime_fail():
+    with pytest.raises(ValueError):
+        get_last_document_datetime("Does not exist")
+
+
+@patch("common.mongo.get_collection_name")
+def test_write_df_to_collection(get_collection_name_mock, capsys):
     db = get_database()
 
     test_collection_name = f"test_donations_{ObjectId()}"
+    get_collection_name_mock.return_value = test_collection_name
     db.create_collection(test_collection_name)
     enforce_schema(test_collection_name)
 
@@ -38,13 +47,24 @@ def test_write_df_to_collection():
 
     sources = get_sources_names_list()
     for source in get_sources_names_list():
-        write_df_to_collection(df, test_collection_name, donation_source=source)
+        write_df_to_collection_with_logs(
+            df,
+            last_document_datetime="1",
+            current_datetime="2",
+            donation_source=source,
+        )
+        assert f"1 - 2 | {source} | Wrote {len(df)} rows" in capsys.readouterr().out
+
+    write_df_to_collection_with_logs(
+        pd.DataFrame({}), last_document_datetime="1", current_datetime="2"
+    )
+    assert "1 - 2 | PayPal | No data" in capsys.readouterr().out
 
     with pytest.raises(BulkWriteError, match="donationSource"):
-        write_df_to_collection(df, test_collection_name, donation_source="Not Allowed")
+        write_df_to_collection(df, donation_source="Not Allowed")
 
     enforce_schema(test_collection_name, sources=sources + ["Not Allowed"])
 
-    write_df_to_collection(df, test_collection_name, donation_source="Not Allowed")
+    write_df_to_collection(df, donation_source="Not Allowed")
 
     db.drop_collection(test_collection_name)

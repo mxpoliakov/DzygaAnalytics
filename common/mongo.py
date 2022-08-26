@@ -13,24 +13,27 @@ def get_database() -> Database:
     return MongoClient(os.environ["MONGO_URI"])[get_db_name()]
 
 
-def get_collection(collection_name=get_collection_name()) -> Collection:
+def get_collection(collection_name=None) -> Collection:
+    collection_name = collection_name if collection_name is not None else get_collection_name()
     return get_database().get_collection(collection_name)
 
 
 def write_df_to_collection_with_logs(
-    df, last_document_datetime, current_datetime, donation_source="PayPal", insertion_mode="Manual"
+    df,
+    last_document_datetime,
+    current_datetime,
+    donation_source="PayPal",
+    insertion_mode="Manual",
 ):
     base_str = f"{last_document_datetime} - {current_datetime} | {donation_source} |"
     if not df.empty:
         write_df_to_collection(df, donation_source, insertion_mode)
         print(f"{base_str} Wrote {len(df)} rows")
     else:
-        print(f"{base_str} | No data")
+        print(f"{base_str} No data")
 
 
-def write_df_to_collection(
-    df, collection_name=get_collection_name(), donation_source="PayPal", insertion_mode="Manual"
-):
+def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"):
     rows_to_insert = []
     for _, row in df.iterrows():
         row_insert = {
@@ -46,7 +49,7 @@ def write_df_to_collection(
         }
         rows_to_insert.append(row_insert)
 
-    get_collection(collection_name).insert_many(rows_to_insert)
+    get_collection().insert_many(rows_to_insert)
 
 
 def get_last_document_datetime(donation_source, convert_to_str=True):

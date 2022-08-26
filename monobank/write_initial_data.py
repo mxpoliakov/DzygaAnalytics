@@ -16,4 +16,4 @@ if __name__ == "__main__":
     start_datetime = datetime(2022, 7, 1)
     end_datetime = datetime(2022, 8, 1)
     df = get_monobank_api_data(access_token, account_id, start_datetime, end_datetime)
-    write_df_to_collection(df, args.donation_source, insertion_mode="Manual")
+    write_df_to_collection(df, donation_source=args.donation_source, insertion_mode="Manual")
