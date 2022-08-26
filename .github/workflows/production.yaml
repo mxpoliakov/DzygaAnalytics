@@ -1,4 +1,4 @@
-name: Production deployment
+name: Production Deployment
 on:
   push:
     branches:
