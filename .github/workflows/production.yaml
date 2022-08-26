@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - 'main'
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   deploy-function:
     name: Deploy GCP Cloud Function
@@ -18,14 +20,14 @@ jobs:
     - id: Deploy
       uses: google-github-actions/deploy-cloud-functions@v0
       with:
-        name: update-dashboard
+        name: update-dashboard-test
         runtime: python310
         entry_point: update_dashboard
         memory_mb: 512
         region: europe-west1
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         event_trigger_type: google.pubsub.topic.publish 
-        event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/update-dashboard
+        event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/update-dashboard-test
         env_vars: |
           MONGO_URI=${{ secrets.MONGO_URI }} 
           PAYPAL_DIMKO_CLIENT_ID=${{ secrets.PAYPAL_DIMKO_CLIENT_ID }}
