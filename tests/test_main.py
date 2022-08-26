@@ -2,7 +2,7 @@ from unittest.mock import call
 from unittest.mock import patch
 
 from common.config import get_sources
-from main import update
+from main import update_dashboard
 
 
 def test_update():
@@ -10,7 +10,7 @@ def test_update():
         patch("main.write_new_data_monobank", return_value=None) as write_new_data_monobank_mock,
         patch("main.write_new_data_paypal", return_value=None) as write_new_data_paypal_mock,
     ):
-        update(None, None)
+        update_dashboard(None, None)
 
         paypal_calls = []
         monobank_calls = []

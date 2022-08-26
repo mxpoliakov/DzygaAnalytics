@@ -3,7 +3,7 @@ from monobank.write_new_data import write_new_data as write_new_data_monobank
 from paypal.write_new_data import write_new_data as write_new_data_paypal
 
 
-def update(event, context):
+def update_dashboard(event, context):
     _ = event
     _ = context
 

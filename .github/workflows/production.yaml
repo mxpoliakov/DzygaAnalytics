@@ -1,0 +1,36 @@
+name: Production deployment
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy-function:
+    name: Deploy GCP Cloud Function
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - id: Auth
+      uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    - id: Deploy
+      uses: google-github-actions/deploy-cloud-functions@v0
+      with:
+        name: update-dashboard
+        runtime: python310
+        entry_point: update_dashboard
+        memory_mb: 512
+        region: europe-west1
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        event_trigger_type: google.pubsub.topic.publish 
+        event_trigger_resource: projects/${{ secrets.GCP_PROJECT_ID }}/topics/update-dashboard
+        env_vars: |
+          MONGO_URI=${{ secrets.MONGO_URI }} 
+          PAYPAL_DIMKO_CLIENT_ID=${{ secrets.PAYPAL_DIMKO_CLIENT_ID }}
+          PAYPAL_DIMKO_SECRET_ID=${{ secrets.PAYPAL_DIMKO_SECRET_ID }}
+          PAYPAL_ROMAN_CLIENT_ID=${{ secrets.PAYPAL_ROMAN_CLIENT_ID }}
+          PAYPAL_ROMAN_SECRET_ID=${{ secrets.PAYPAL_ROMAN_SECRET_ID }}
+          MONO_JAR_DIMKO_X_TOKEN=${{ secrets.MONO_JAR_DIMKO_X_TOKEN }}
+          MONO_JAR_DIMKO_ACCOUNT_ID=${{ secrets.MONO_JAR_DIMKO_ACCOUNT_ID }}
