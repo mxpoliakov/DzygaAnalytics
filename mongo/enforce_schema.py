@@ -59,3 +59,7 @@ def enforce_schema(collection=get_collection_name(), sources=get_sources_names_l
     }
 
     db.command("collMod", collection, validator=validator, validationLevel="strict")
+
+
+if __name__ == "__main__":
+    enforce_schema()
