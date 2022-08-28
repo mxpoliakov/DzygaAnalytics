@@ -33,12 +33,21 @@ def write_df_to_collection_with_logs(
         print(f"{base_str} No data")
 
 
+def mask_name(name, chars_to_keep=2):
+    if isinstance(name, str):
+        return " ".join(
+            [word[:chars_to_keep] + "*" * len(word[chars_to_keep:]) for word in name.split()]
+        )
+    return ""
+
+
 def write_df_to_collection(df, donation_source="PayPal", insertion_mode="Manual"):
     rows_to_insert = []
     for _, row in df.iterrows():
         row_insert = {
             "donationSource": donation_source,
             "senderName": row["Name"],
+            "senderNameCensored": mask_name(row["Name"]),
             "senderEmail": row["Email"],
             "currency": row["Currency"],
             "amountUSD": row["Converted Sum"],
