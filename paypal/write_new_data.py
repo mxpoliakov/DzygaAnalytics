@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import requests
 
+from common.config import get_creds_keys_list
 from common.convert_currency import convert_currency
 from common.convert_currency import get_currency_converter_intance
 from common.mongo import get_last_document_datetime
@@ -52,12 +53,20 @@ def get_paypal_api_data(access_token, last_document_datetime):
 
     currency_converter_intance = get_currency_converter_intance()
 
+    account_emails = [
+        os.environ[f"{creds_key}_EMAIL"] for creds_key in get_creds_keys_list("PayPal")
+    ]
+
     for transaction in transactions:
         transaction_info = transaction["transaction_info"]
         code = transaction_info["transaction_event_code"]
         net = float(transaction_info["transaction_amount"]["value"])
         if code in ["T0000", "T0011"] and net > 0:
             payer_info = transaction["payer_info"]
+            email = payer_info["email_address"]
+            if email in account_emails:
+                # Avoid including payments between our PayPal accounts
+                continue
             currency = transaction_info["transaction_amount"]["currency_code"]
             transaction_dt = datetime.fromisoformat(
                 transaction_info["transaction_initiation_date"].split("+")[0]
@@ -65,7 +74,7 @@ def get_paypal_api_data(access_token, last_document_datetime):
             rows.append(
                 {
                     "Name": payer_info["payer_name"]["alternate_full_name"],
-                    "Email": payer_info["email_address"],
+                    "Email": email,
                     "Converted Sum": convert_currency(
                         currency_converter_intance, net, currency, transaction_dt
                     ),

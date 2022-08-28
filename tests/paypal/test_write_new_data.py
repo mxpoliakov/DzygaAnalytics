@@ -11,12 +11,24 @@ from common.config import get_sources
 from common.mongo import get_database
 from mongo.enforce_schema import enforce_schema
 from paypal.write_new_data import get_access_token
+from paypal.write_new_data import get_paypal_api_data
 from paypal.write_new_data import write_new_data
 
 
 @pytest.mark.parametrize("creds_key", get_creds_keys_list("PayPal"))
 def test_get_access_token(creds_key):
     assert isinstance(get_access_token(creds_key), str)
+
+
+@patch("paypal.write_new_data.datetime")
+def test_get_paypal_api_data_does_not_include_payments_between_accounts(datetime_mock):
+    datetime_mock.utcnow = Mock(return_value=datetime(2022, 8, 28))
+    datetime_mock.fromisoformat = datetime.fromisoformat
+    last_document_datetime = datetime(2022, 8, 22).strftime("%Y-%m-%dT%H:%M:%SZ")
+    creds_key = get_sources()[1]["creds_key"]
+    df, _ = get_paypal_api_data(get_access_token(creds_key), last_document_datetime)
+    assert len(df) == 1
+    assert df["Converted Sum"][0] == 50.0
 
 
 @patch("paypal.write_new_data.datetime")
@@ -38,6 +50,7 @@ def test_write_new_data(get_collection_name_mock, get_last_document_datetime_moc
     entries = list(db.get_collection(test_collection_name).find({}))
     df = pd.DataFrame.from_dict(entries)
     assert len(df) == 4
+    assert df["senderNameCensored"][0] == "St**** JP"
     assert df["amountUSD"].sum() == 250.64
     assert df["donationSource"].unique()[0] == source["name"]
     assert df["insertionMode"].unique()[0] == "Auto"

@@ -10,6 +10,7 @@ def enforce_schema(collection=get_collection_name(), sources=get_sources_names_l
             "bsonType": "object",
             "required": [
                 "senderName",
+                "senderNameCensored",
                 "senderEmail",
                 "datetime",
                 "currency",
@@ -23,6 +24,10 @@ def enforce_schema(collection=get_collection_name(), sources=get_sources_names_l
                 "senderName": {
                     "bsonType": ["string", "null"],
                     "description": "must be a string or null and is required",
+                },
+                "senderNameCensored": {
+                    "bsonType": ["string"],
+                    "description": "must be a string and is required",
                 },
                 "senderEmail": {
                     "bsonType": ["string", "null"],
