@@ -3,7 +3,9 @@ from common.config import get_sources_names_list
 from common.mongo import get_database
 
 
-def enforce_schema(collection=get_collection_name(), sources=get_sources_names_list()):
+def enforce_schema(
+    collection: str = get_collection_name(), sources: list[str] = get_sources_names_list()
+) -> None:
     db = get_database()
     validator = {
         "$jsonSchema": {

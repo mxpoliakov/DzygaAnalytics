@@ -10,10 +10,11 @@ from sources.base import SourceBase
 MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
 UAH_CODE = 980
 USD_CODE = 840
+DEFAULT_CONVERTION_RATE = 40
 
 
 class Monobank(SourceBase):
-    def get_usd_to_uah_current_rate(self):
+    def get_usd_to_uah_current_rate(self) -> float:
         response = requests.get(
             f"{MONOBANK_ENDPOINT_URL}/bank/currency",
             headers={"Content-Type": "application/json"},
@@ -24,15 +25,14 @@ class Monobank(SourceBase):
         for rate_info in response:
             if rate_info["currencyCodeA"] == USD_CODE and rate_info["currencyCodeB"] == UAH_CODE:
                 return rate_info["rateSell"]
-        return None
+        return DEFAULT_CONVERTION_RATE
 
     def get_api_data(self, start_datetime: datetime, end_datetime: datetime) -> pd.DataFrame:
-        start_datetime = int(start_datetime.timestamp())
         account_id = os.environ[f"{self.creds_key}_ACCOUNT_ID"]
-        url = f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/{start_datetime}"
-        if end_datetime:
-            end_datetime = int(end_datetime.timestamp())
-            url += f"/{end_datetime}"
+        url = (
+            f"{MONOBANK_ENDPOINT_URL}/personal/statement/"
+            f"{account_id}/{int(start_datetime.timestamp())}/{int(end_datetime.timestamp())}"
+        )
         response = requests.get(
             url,
             headers={
@@ -46,8 +46,7 @@ class Monobank(SourceBase):
         rows = []
         rate = self.get_usd_to_uah_current_rate()
         transactions = response[::-1]  # Reverse list
-        if not end_datetime:
-            # If end_datetime, we already have some database entries.
+        if not self.is_start_datetime_creation_date(start_datetime):
             # Skip first transaction returned, because it is already stored in the database.
             transactions = transactions[1:]
 

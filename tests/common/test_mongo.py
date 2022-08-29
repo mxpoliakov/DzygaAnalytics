@@ -48,15 +48,13 @@ def test_write_df_to_collection(get_collection_name_mock, capsys):
     for source in get_sources_names_list():
         write_df_to_collection_with_logs(
             df,
-            last_document_datetime="1",
-            current_datetime="2",
+            start_datetime="1",
+            end_datetime="2",
             donation_source=source,
         )
         assert f"1 - 2 | {source} | Wrote {len(df)} rows" in capsys.readouterr().out
 
-    write_df_to_collection_with_logs(
-        pd.DataFrame({}), last_document_datetime="1", current_datetime="2"
-    )
+    write_df_to_collection_with_logs(pd.DataFrame({}), start_datetime="1", end_datetime="2")
     assert "1 - 2 | PayPal | No data" in capsys.readouterr().out
 
     with pytest.raises(BulkWriteError, match="donationSource"):

@@ -22,13 +22,13 @@ def get_collection(collection_name: None | str = None) -> Collection:
 
 
 def write_df_to_collection_with_logs(
-    df,
-    last_document_datetime,
-    current_datetime,
-    donation_source="PayPal",
-    insertion_mode="Manual",
-):
-    base_str = f"{last_document_datetime} - {current_datetime} | {donation_source} |"
+    df: pd.DataFrame,
+    start_datetime: str | datetime,
+    end_datetime: str | datetime,
+    donation_source: str = "PayPal",
+    insertion_mode: str = "Manual",
+) -> None:
+    base_str = f"{start_datetime} - {end_datetime} | {donation_source} |"
     if not df.empty:
         write_df_to_collection(df, donation_source, insertion_mode)
         print(f"{base_str} Wrote {len(df)} rows")
