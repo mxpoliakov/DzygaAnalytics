@@ -4,10 +4,10 @@ from datetime import datetime
 
 import pandas as pd
 import requests
+from currency_converter import ECB_URL
+from currency_converter import CurrencyConverter
 
 from common.config import get_creds_keys_list
-from common.convert_currency import convert_currency
-from common.convert_currency import get_currency_converter_intance
 from sources.base import SourceBase
 
 PAYPAL_ENDPOINT_URL = "https://api-m.paypal.com/v1"
@@ -15,6 +15,17 @@ MAX_PAYPAL_TRANSACTIONS = 500
 
 
 class PayPal(SourceBase):
+    def __init__(self, creds_key: str, donation_source: str):
+        super().__init__(creds_key, donation_source)
+        self.currency_converter = CurrencyConverter(
+            ECB_URL, fallback_on_missing_rate=True, fallback_on_wrong_date=True
+        )
+
+    def convert_currency(self, value: float, currency: str, date: datetime) -> float:
+        if currency != "USD":
+            return self.currency_converter.convert(value, currency, "USD", date=date)
+        return value
+
     def get_access_token(self) -> str:
         response = requests.post(
             f"{PAYPAL_ENDPOINT_URL}/oauth2/token",
@@ -48,14 +59,15 @@ class PayPal(SourceBase):
         assert response.status_code == requests.codes["ok"], response.text
         response = json.loads(response.text)
 
+        if self.is_start_datetime_creation_date(start_datetime):
+            return response["transaction_details"]
+
         # Skip first transaction returned, because it is already stored in the database.
         return response["transaction_details"][1:]
 
     def get_api_data(self, start_datetime: datetime, end_datetime: datetime) -> pd.DataFrame:
         transactions = self.get_api_data_raw(start_datetime, end_datetime)
         rows = []
-
-        currency_converter_intance = get_currency_converter_intance()
 
         account_emails = [
             os.environ[f"{creds_key}_EMAIL"] for creds_key in get_creds_keys_list("PayPal")
@@ -78,9 +90,7 @@ class PayPal(SourceBase):
                     {
                         "Name": payer_info["payer_name"]["alternate_full_name"],
                         "Email": payer_info["email_address"],
-                        "Converted Sum": convert_currency(
-                            currency_converter_intance, net, currency, transaction_dt
-                        ),
+                        "Converted Sum": self.convert_currency(net, currency, transaction_dt),
                         "Original Sum": net,
                         "Currency": currency,
                         "Datetime": transaction_dt,

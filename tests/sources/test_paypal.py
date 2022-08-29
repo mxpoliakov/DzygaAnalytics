@@ -13,6 +13,12 @@ from mongo.enforce_schema import enforce_schema
 from sources.paypal import PayPal
 
 
+def test_convert_currency():
+    paypal = PayPal("Key", "PayPal")
+    assert round(paypal.convert_currency(10, "EUR", datetime(2022, 8, 20)), 2) == 10.04
+    assert paypal.convert_currency(10, "USD", datetime(2022, 8, 20)) == 10
+
+
 @pytest.mark.parametrize("creds_key", get_creds_keys_list("PayPal"))
 def test_get_access_token(creds_key):
     paypal = PayPal(creds_key, "PayPal")
@@ -21,7 +27,8 @@ def test_get_access_token(creds_key):
 
 def test_get_api_data_does_not_include_payments_between_accounts():
     creds_key = get_sources()[1]["creds_key"]
-    paypal = PayPal(creds_key, "PayPal")
+    donation_source = get_sources()[1]["name"]
+    paypal = PayPal(creds_key, donation_source)
     df = paypal.get_api_data(datetime(2022, 8, 22), datetime(2022, 8, 28))
     assert len(df) == 1
     assert df["Converted Sum"][0] == 50.0
