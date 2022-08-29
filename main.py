@@ -1,17 +1,20 @@
 from common.config import get_sources
-from monobank.write_new_data import write_new_data as write_new_data_monobank
-from paypal.write_new_data import write_new_data as write_new_data_paypal
+from sources.base import SourceBase
+from sources.monobank import Monobank
+from sources.paypal import PayPal
+
+
+def get_source_class(source_type: str) -> SourceBase:
+    class_map = {"PayPal": PayPal, "Monobank": Monobank}
+    return class_map[source_type]
 
 
 def update_dashboard(event, context):
     _ = event
     _ = context
 
-    for source in get_sources():
-        match source["type"]:
-            case "PayPal":
-                write_new_data = write_new_data_paypal
-            case "Monobank":
-                write_new_data = write_new_data_monobank
-
-        write_new_data(creds_key=source["creds_key"], donation_source=source["name"])
+    for source_dict in get_sources():
+        source_class = get_source_class(source_dict["type"])
+        source_class(
+            creds_key=source_dict["creds_key"], donation_source=source_dict["name"]
+        ).write_new_data()

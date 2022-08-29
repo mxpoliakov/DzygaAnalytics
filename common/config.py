@@ -22,6 +22,13 @@ def get_sources():
     return get_config()["sources"]
 
 
+def get_source(name):
+    for source in get_sources():
+        if source["name"] == name:
+            return source
+    raise ValueError(f"No config is found for source {name}")
+
+
 def get_sources_names_list():
     return [source["name"] for source in get_sources()]
 

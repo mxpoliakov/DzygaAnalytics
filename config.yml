@@ -8,11 +8,14 @@ sources:
     name: Dimko's PayPal
     type: PayPal
     creds_key: PAYPAL_DIMKO
+    creation_date: 2022-04-01T00:00:00
   - 
     name: Roman's PayPal
     type: PayPal
     creds_key: PAYPAL_ROMAN
+    creation_date: 2022-04-01T00:00:00
   - 
     name: Dzyga's Paw Jar
     type: Monobank
     creds_key: MONO_JAR_DIMKO
+    creation_date: 2022-07-01T00:00:00
