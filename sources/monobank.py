@@ -1,3 +1,4 @@
+"""This module contains class for Monobank donation source"""
 import json
 import os
 from datetime import datetime
@@ -11,10 +12,33 @@ MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
 UAH_CODE = 980
 USD_CODE = 840
 DEFAULT_CONVERTION_RATE = 40
+DEFAULT_CONVERTION_RATE = 40
 
 
 class Monobank(SourceBase):
+    """A class for retrieving Monobank API transactions.
+    API info in Ukrainian: https://api.monobank.ua/docs/
+
+    We need following secret environment variables:
+    {CREDS_KEY}_ACCOUNT_ID and {CREDS_KEY}_X_TOKEN
+
+    Parameters
+    ----------
+    creds_key : str
+        The credential key for the source to access secret environment variables
+    donation_source : str
+        The donation source name
+    """
+
     def get_usd_to_uah_current_rate(self) -> float:
+        """currency_converter package does not support UAH,
+        so we query Monobank for USD / UAH rate.
+
+        Returns
+        -------
+        float
+            Returns USD / UAH rate for the current datetime.
+        """
         response = requests.get(
             f"{MONOBANK_ENDPOINT_URL}/bank/currency",
             headers={"Content-Type": "application/json"},
@@ -27,11 +51,11 @@ class Monobank(SourceBase):
                 return rate_info["rateSell"]
         return DEFAULT_CONVERTION_RATE
 
-    def get_api_data(self, start_datetime: datetime, end_datetime: datetime) -> pd.DataFrame:
+    def get_api_data(self) -> pd.DataFrame:
         account_id = os.environ[f"{self.creds_key}_ACCOUNT_ID"]
         url = (
-            f"{MONOBANK_ENDPOINT_URL}/personal/statement/"
-            f"{account_id}/{int(start_datetime.timestamp())}/{int(end_datetime.timestamp())}"
+            f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/"
+            f"{int(self.start_datetime.timestamp())}/{int(self.end_datetime.timestamp())}"
         )
         response = requests.get(
             url,
@@ -46,11 +70,12 @@ class Monobank(SourceBase):
         rows = []
         rate = self.get_usd_to_uah_current_rate()
         transactions = response[::-1]  # Reverse list
-        if not self.is_start_datetime_creation_date(start_datetime):
+        if not self.is_source_creation_date:
             # Skip first transaction returned, because it is already stored in the database.
             transactions = transactions[1:]
 
         for transaction in transactions:
+            # Transaction amount is encoded as int with decimals
             amount = transaction["amount"] / 100
             converted_amount = round(amount / rate, 2)
             if converted_amount > 0:
@@ -62,13 +87,13 @@ class Monobank(SourceBase):
                 assert transaction["currencyCode"] == UAH_CODE, "Only UAH accounts are supported"
                 rows.append(
                     {
-                        "Name": name if name != "🐈" else None,
-                        "Email": None,
-                        "Converted Sum": converted_amount,
-                        "Original Sum": amount,
-                        "Currency": "UAH",
-                        "Datetime": datetime.utcfromtimestamp(transaction["time"]),
-                        "Note": transaction.get("comment", ""),
+                        "senderName": name if name != "🐈" else None,
+                        "senderEmail": None,
+                        "amountUSD": converted_amount,
+                        "amountOriginal": amount,
+                        "currency": "UAH",
+                        "datetime": datetime.utcfromtimestamp(transaction["time"]),
+                        "senderNote": transaction.get("comment", ""),
                     }
                 )
 
