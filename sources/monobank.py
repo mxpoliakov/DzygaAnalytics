@@ -12,6 +12,7 @@ MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
 UAH_CODE = 980
 USD_CODE = 840
 DEFAULT_CONVERTION_RATE = 40
+DEFAULT_CONVERTION_RATE = 40
 
 
 class Monobank(SourceBase):
