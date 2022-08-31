@@ -1,3 +1,4 @@
+"""This module contains tests for GCP Cloud Function entrypoint"""
 from unittest.mock import call
 from unittest.mock import patch
 
@@ -7,12 +8,13 @@ from sources.monobank import Monobank
 from sources.paypal import PayPal
 
 
-def test_update_dashboard():
+def test_update_dashboard() -> None:
+    """Tests update_dashboard entrypoint"""
     with (
         patch("main.Monobank", spec=Monobank) as write_new_data_monobank_mock,
         patch("main.PayPal", spec=PayPal) as write_new_data_paypal_mock,
     ):
-        update_dashboard(None, None)
+        update_dashboard()
 
         paypal_calls = []
         monobank_calls = []

@@ -1,9 +1,22 @@
+"""This module contains logic to enforce schema validation on MongoDB collection"""
 from common.config import get_collection_name
 from common.config import get_sources_names_list
 from common.mongo import get_database
 
 
-def enforce_schema(collection=get_collection_name(), sources=get_sources_names_list()):
+def enforce_schema(
+    collection: str = get_collection_name(), sources: list[str] = get_sources_names_list()
+) -> None:
+    """Enforces schema validation on MongoDB collection. See more:
+    https://www.mongodb.com/docs/manual/core/schema-validation/specify-json-schema/
+
+    Parameters
+    ----------
+    collection : str, optional
+        Collection name, by default get_collection_name()
+    sources : list[str], optional
+        List of allowed donation sources, by default get_sources_names_list()
+    """
     db = get_database()
     validator = {
         "$jsonSchema": {
