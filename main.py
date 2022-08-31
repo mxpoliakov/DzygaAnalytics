@@ -6,7 +6,7 @@ from sources.paypal import PayPal
 
 def update_dashboard(*args, **kwargs) -> None:
     # pylint: disable=unused-argument
-    """_summary_"""
+    """Entry point for GCP Cloud Function that updates dashboard"""
     class_map = {"PayPal": PayPal, "Monobank": Monobank}
     for source_dict in get_sources():
         source_class = class_map[source_dict["type"]]
