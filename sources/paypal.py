@@ -7,8 +7,6 @@ import pandas as pd
 import requests
 from currency_converter import ECB_URL
 from currency_converter import CurrencyConverter
-from currency_converter import ECB_URL
-from currency_converter import CurrencyConverter
 
 from common.config import get_creds_keys_list
 from sources.base import SourceBase
