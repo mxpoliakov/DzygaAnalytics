@@ -20,12 +20,13 @@ def test_update_dashboard() -> None:
         monobank_calls = []
 
         for source in get_sources():
-            call_signature = call(creds_key=source["creds_key"], donation_source=source["name"])
+            call_signature = call(source["name"])
             match source["type"]:
                 case "PayPal":
                     paypal_calls.append(call_signature)
                 case "Monobank":
                     monobank_calls.append(call_signature)
+
         assert write_new_data_paypal_mock.return_value.write_new_data.call_count == len(
             paypal_calls
         )

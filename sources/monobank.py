@@ -1,6 +1,5 @@
 """This module contains class for Monobank donation source"""
 import json
-import os
 from datetime import datetime
 
 import pandas as pd
@@ -11,21 +10,17 @@ from sources.base import SourceBase
 MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
 UAH_CODE = 980
 USD_CODE = 840
-DEFAULT_CONVERTION_RATE = 40
-DEFAULT_CONVERTION_RATE = 40
+DEFAULT_CONVERTION_RATE = 40.0
 
 
 class Monobank(SourceBase):
     """A class for retrieving Monobank API transactions.
     API info in Ukrainian: https://api.monobank.ua/docs/
 
-    We need following secret environment variables:
-    {CREDS_KEY}_ACCOUNT_ID and {CREDS_KEY}_X_TOKEN
+    We need following secret environment variables: ACCOUNT_ID and X_TOKEN
 
     Parameters
     ----------
-    creds_key : str
-        The credential key for the source to access secret environment variables
     donation_source : str
         The donation source name
     """
@@ -52,7 +47,7 @@ class Monobank(SourceBase):
         return DEFAULT_CONVERTION_RATE
 
     def get_api_data(self) -> pd.DataFrame:
-        account_id = os.environ[f"{self.creds_key}_ACCOUNT_ID"]
+        account_id = self.source_config["account_id"]
         url = (
             f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/"
             f"{int(self.start_datetime.timestamp())}/{int(self.end_datetime.timestamp())}"
@@ -61,7 +56,7 @@ class Monobank(SourceBase):
             url,
             headers={
                 "Content-Type": "application/json",
-                "X-Token": os.environ[f"{self.creds_key}_X_TOKEN"],
+                "X-Token": self.source_config["x_token"],
             },
         )
         assert response.status_code == requests.codes["ok"], response.text

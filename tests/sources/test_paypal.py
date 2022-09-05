@@ -7,8 +7,7 @@ import pandas as pd
 import pytest
 from bson import ObjectId
 
-from common.config import get_creds_keys_list
-from common.config import get_sources
+from common.config import get_source
 from common.mongo import get_database
 from mongo.enforce_schema import enforce_schema
 from sources.paypal import PayPal
@@ -16,25 +15,21 @@ from sources.paypal import PayPal
 
 def test_convert_currency() -> None:
     """Tests currency_converter package"""
-    donation_source = get_sources()[0]["name"]
-    paypal = PayPal("KEY", donation_source)
-    assert round(paypal.convert_currency(10, "EUR", datetime(2022, 8, 20)), 2) == 10.04
+    paypal = PayPal("Dimko's PayPal")
+    assert paypal.convert_currency(10, "EUR", datetime(2022, 8, 20)) == 10.04
     assert paypal.convert_currency(10, "USD", datetime(2022, 8, 20)) == 10
 
 
-@pytest.mark.parametrize("creds_key", get_creds_keys_list("PayPal"))
-def test_get_access_token(creds_key) -> None:
+@pytest.mark.parametrize("name", ["Dimko's PayPal", "Roman's PayPal"])
+def test_get_access_token(name) -> None:
     """Tests if can get access token for all PayPal accounts specified in config file"""
-    donation_source = get_sources()[0]["name"]
-    paypal = PayPal(creds_key, donation_source)
+    paypal = PayPal(name)
     assert isinstance(paypal.get_access_token(), str)
 
 
 def test_get_api_data_does_not_include_payments_between_accounts() -> None:
     """Tests that we don't include cross account transaction between 2022-08-22 and 2022-08-28"""
-    creds_key = get_sources()[1]["creds_key"]
-    donation_source = get_sources()[1]["name"]
-    paypal = PayPal(creds_key, donation_source)
+    paypal = PayPal("Roman's PayPal")
     paypal.start_datetime = datetime(2022, 8, 22)
     paypal.end_datetime = datetime(2022, 8, 28)
     df = paypal.get_api_data()
@@ -63,14 +58,15 @@ def test_write_new_data(
     """
     datetime_mock.utcnow = Mock(return_value=datetime(2022, 8, 2))
     datetime_mock.fromisoformat = datetime.fromisoformat
-    get_source_mock.return_value = {"creation_date": datetime(2022, 8, 1)}
+    source = get_source("Dimko's PayPal")
+    source["creation_date"] = datetime(2022, 8, 1)
+    get_source_mock.return_value = source
     test_collection_name = f"test_donations_{ObjectId()}"
     get_collection_name_mock.return_value = test_collection_name
     db = get_database()
     db.create_collection(test_collection_name)
     enforce_schema(test_collection_name)
-    source = get_sources()[0]
-    paypal = PayPal(creds_key=source["creds_key"], donation_source=source["name"])
+    paypal = PayPal(source["name"])
     paypal.is_source_creation_date = False
     paypal.write_new_data()
     entries = list(db.get_collection(test_collection_name).find({}))

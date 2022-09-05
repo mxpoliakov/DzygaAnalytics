@@ -18,16 +18,13 @@ class SourceBase(ABC):
 
     Parameters
     ----------
-    creds_key : str
-        The credential key for the source to access secret environment variables
     donation_source: str
         The donation source name
     """
 
-    def __init__(self, creds_key: str, donation_source: str):
-        self.creds_key = creds_key
+    def __init__(self, donation_source: str):
         self.donation_source = donation_source
-
+        self.source_config = get_source(donation_source)
         self.collection = get_collection()
         self.insertion_mode = "Auto"
 
@@ -57,7 +54,7 @@ class SourceBase(ABC):
             {"donationSource": self.donation_source}, sort=[("datetime", DESCENDING)]
         )
         if last_document is None:
-            return get_source(self.donation_source)["creation_date"], True
+            return self.source_config["creation_date"], True
 
         return last_document["datetime"], False
 
