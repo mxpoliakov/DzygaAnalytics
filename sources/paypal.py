@@ -1,6 +1,5 @@
 """This module contains class for PayPal donation source"""
 import json
-import os
 from datetime import datetime
 
 import pandas as pd
@@ -8,7 +7,7 @@ import requests
 from currency_converter import ECB_URL
 from currency_converter import CurrencyConverter
 
-from common.config import get_creds_keys_list
+from common.config import get_sources
 from sources.base import SourceBase
 
 PAYPAL_ENDPOINT_URL = "https://api-m.paypal.com/v1"
@@ -21,19 +20,16 @@ class PayPal(SourceBase):
     This supports personal PayPal accounts and can convert
     multiple currencies into USD using currency_converter package.
 
-    We need following secret environment variables:
-    {CREDS_KEY}_CLIENT_ID, {CREDS_KEY}_SECRET_ID and {CREDS_KEY}_EMAIL
+    We need following secret environment variables: CLIENT_ID and SECRET_ID
 
     Parameters
     ----------
-    creds_key : str
-        The credential key for the source to access secret environment variables
     donation_source : str
         The donation source name
     """
 
-    def __init__(self, creds_key: str, donation_source: str):
-        super().__init__(creds_key, donation_source)
+    def __init__(self, donation_source: str):
+        super().__init__(donation_source)
         self.currency_converter = CurrencyConverter(
             ECB_URL, fallback_on_missing_rate=True, fallback_on_wrong_date=True
         )
@@ -56,14 +52,13 @@ class PayPal(SourceBase):
             Converted USD value
         """
         if currency != "USD":
-            return self.currency_converter.convert(value, currency, "USD", date=date)
+            return round(self.currency_converter.convert(value, currency, "USD", date=date), 2)
         return value
 
     def get_access_token(self) -> str:
         """Fetches a temp access token for PayPal API.
         More info: https://developer.paypal.com/api/rest/authentication/
-        Two secret environment variables are required:
-        {CREDS_KEY}_CLIENT_ID and {CREDS_KEY}_SECRET_ID
+        Two secret environment variables are required: CLIENT_ID and SECRET_ID
 
         Returns
         -------
@@ -73,8 +68,8 @@ class PayPal(SourceBase):
         response = requests.post(
             f"{PAYPAL_ENDPOINT_URL}/oauth2/token",
             auth=(
-                os.environ[f"{self.creds_key}_CLIENT_ID"],
-                os.environ[f"{self.creds_key}_SECRET_ID"],
+                self.source_config["client_id"],
+                self.source_config["secret_id"],
             ),
             headers={"Accept": "application/json", "Accept-Language": "en_US"},
             data={"grant_type": "client_credentials"},
@@ -120,9 +115,7 @@ class PayPal(SourceBase):
         transactions = self.get_api_data_raw()
         rows = []
 
-        account_emails = [
-            os.environ[f"{creds_key}_EMAIL"] for creds_key in get_creds_keys_list("PayPal")
-        ]
+        account_emails = [source["email"] for source in get_sources("PayPal")]
 
         for transaction in transactions:
             transaction_info = transaction["transaction_info"]

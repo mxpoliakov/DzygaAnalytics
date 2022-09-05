@@ -1,4 +1,6 @@
 """This module contains utilities for reading config properties"""
+import os
+import re
 from datetime import datetime
 from functools import cache
 
@@ -8,6 +10,8 @@ import yaml
 @cache
 def get_config(filepath: str = "config.yml") -> dict:
     """Loads yaml config file and caches it's content in memory.
+    Modifies yaml.SafeLoader to expand strings like ${ENV_VAR} into
+    environment variable value.
 
     Parameters
     ----------
@@ -19,6 +23,18 @@ def get_config(filepath: str = "config.yml") -> dict:
     dict
         Loaded contents of the file as a dict
     """
+    env_pattern = re.compile(r".*?\${(.*?)}.*?")
+
+    def env_constructor(loader: yaml.loader.SafeLoader, node: yaml.nodes.ScalarNode) -> str:
+        _ = loader
+        value = node.value
+        match = env_pattern.match(value)
+        env_var = match.group()[2:-1]
+        return os.environ[env_var] + value[match.end() :]
+
+    yaml.add_implicit_resolver("!pathex", env_pattern, Loader=yaml.loader.SafeLoader)
+    yaml.add_constructor("!pathex", env_constructor, Loader=yaml.loader.SafeLoader)
+
     with open(filepath, "r", encoding="utf-8") as f:
         data_loaded = yaml.safe_load(f)
     return data_loaded
@@ -34,6 +50,16 @@ def get_db_name() -> str:
     return get_config()["mongo"]["db"]
 
 
+def get_mongo_uri() -> str:
+    """
+    Returns
+    -------
+    str
+        MongoDB secret URI that allows access to database
+    """
+    return get_config()["mongo"]["mongo_uri"]
+
+
 def get_collection_name() -> str:
     """
     Returns
@@ -44,14 +70,19 @@ def get_collection_name() -> str:
     return get_config()["mongo"]["collection"]
 
 
-def get_sources() -> list[dict[str, str | datetime]]:
+def get_sources(source_type=None) -> list[dict[str, str | datetime]]:
     """
     Returns
     -------
     list[dict[str, str | datetime]]
         List of donation source configs
     """
-    return get_config()["sources"]
+    sources = get_config()["sources"]
+
+    if source_type is not None:
+        return [source for source in sources if source_type in source["type"]]
+
+    return sources
 
 
 def get_source(name: str) -> dict[str, str | datetime]:
@@ -86,21 +117,3 @@ def get_sources_names_list() -> list[str]:
        List of available source names in the config file.
     """
     return [source["name"] for source in get_sources()]
-
-
-def get_creds_keys_list(source_type: str = "all") -> list[str]:
-    """Get credentials keys for donation sources.
-
-    Parameters
-    ----------
-    source_type : str, optional
-        Type of the source, by default "all"
-
-    Returns
-    -------
-    list[str]
-       Credentials keys for donation sources.
-    """
-    return [
-        source["creds_key"] for source in get_sources() if source_type in (source["type"], "all")
-    ]

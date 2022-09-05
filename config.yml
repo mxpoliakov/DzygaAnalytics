@@ -3,19 +3,37 @@ version: 2.1
 mongo:
   db: AppDB
   collection: donations
+  mongo_uri: ${MONGO_URI}
 sources:
   - 
     name: Dimko's PayPal
     type: PayPal
-    creds_key: PAYPAL_DIMKO
+    client_id: ${PAYPAL_DIMKO_CLIENT_ID}
+    secret_id: ${PAYPAL_DIMKO_SECRET_ID}
+    email: d1mnewz@gmail.com
     creation_date: 2022-04-01T00:00:00
   - 
     name: Roman's PayPal
     type: PayPal
-    creds_key: PAYPAL_ROMAN
+    client_id: ${PAYPAL_ROMAN_CLIENT_ID}
+    secret_id: ${PAYPAL_ROMAN_SECRET_ID}
+    email: kyryliuk.roma@gmail.com
     creation_date: 2022-04-01T00:00:00
   - 
     name: Dzyga's Paw Jar
     type: Monobank
-    creds_key: MONO_JAR_DIMKO
+    account_id: ${MONO_JAR_DIMKO_ACCOUNT_ID}
+    x_token: ${MONO_JAR_DIMKO_X_TOKEN}
     creation_date: 2022-07-01T00:00:00
+  - 
+    name: Dimko's Wise
+    type: Manual
+    creation_date: 2022-05-01T00:00:00
+  - 
+    name: Dzyga's Paw Charity Accounts
+    type: Manual
+    creation_date: 2022-07-20T00:00:00
+  - 
+    name: Other
+    type: Manual
+    creation_date: 2022-04-01T00:00:00

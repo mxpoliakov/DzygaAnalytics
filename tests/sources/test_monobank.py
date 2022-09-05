@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pandas as pd
 from bson import ObjectId
 
-from common.config import get_creds_keys_list
 from common.mongo import get_database
 from sources.monobank import Monobank
 
@@ -31,8 +30,7 @@ def test_write_new_data(get_collection_name_mock: Mock, datetime_mock: Mock) -> 
     get_collection_name_mock.return_value = test_collection_name
     db = get_database()
     db.create_collection(test_collection_name)
-    creds_key = get_creds_keys_list("Monobank").pop()
-    monobank = Monobank(creds_key, donation_source="Dzyga's Paw Jar")
+    monobank = Monobank("Dzyga's Paw Jar")
     monobank.write_new_data()
     entries = list(db.get_collection(test_collection_name).find({}))
     df = pd.DataFrame.from_dict(entries)

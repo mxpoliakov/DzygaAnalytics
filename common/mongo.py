@@ -1,5 +1,4 @@
 """This module contains utilities for working with MongoDB"""
-import os
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -7,6 +6,7 @@ from pymongo.database import Database
 
 from common.config import get_collection_name
 from common.config import get_db_name
+from common.config import get_mongo_uri
 
 
 def get_database() -> Database:
@@ -18,7 +18,7 @@ def get_database() -> Database:
     Database
         Connection to MongoDB Database
     """
-    return MongoClient(os.environ["MONGO_URI"])[get_db_name()]
+    return MongoClient(get_mongo_uri())[get_db_name()]
 
 
 def get_collection(collection_name: None | str = None) -> Collection:

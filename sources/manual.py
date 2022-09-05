@@ -10,16 +10,14 @@ class Manual(SourceBase):
 
     Parameters
     ----------
-    creds_key : str
-        The credential key for the source to access secret environment variables
     donation_source : str
         The donation source name
     filepath : str
         The csv data path to write
     """
 
-    def __init__(self, creds_key: str, donation_source: str, filepath: str):
-        super().__init__(creds_key, donation_source)
+    def __init__(self, donation_source: str, filepath: str):
+        super().__init__(donation_source)
         self.insertion_mode = "Manual"
         self.start_datetime = None
         self.end_datetime = None

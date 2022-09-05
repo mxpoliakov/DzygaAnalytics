@@ -33,21 +33,21 @@ def test_write_new_data(get_collection_name_mock: Mock, capsys: CaptureFixture) 
     enforce_schema(test_collection_name)
 
     sources = get_sources_names_list()
-    for source in sources:
-        manual = Manual("KEY", source, "tests/test_data/sample.csv")
-        manual.write_new_data()
-        assert f"None - None | {source} | Wrote 6 rows" in capsys.readouterr().out
 
-    manual = Manual("KEY", sources[0], "tests/test_data/empty.csv")
+    manual = Manual("Other", "tests/test_data/sample.csv")
     manual.write_new_data()
-    assert f"None - None | {sources[0]} | No data" in capsys.readouterr().out
+    assert "None - None | Other | Wrote 6 rows" in capsys.readouterr().out
+
+    manual = Manual("Other", "tests/test_data/empty.csv")
+    manual.write_new_data()
+    assert "None - None | Other | No data" in capsys.readouterr().out
 
     with patch("sources.base.get_source", return_value={"creation_date": datetime(2022, 8, 1)}):
         with pytest.raises(BulkWriteError, match="donationSource"):
-            manual = Manual("KEY", "Not Allowed", "tests/test_data/sample.csv")
+            manual = Manual("Does not exist yet", "tests/test_data/sample.csv")
             manual.write_new_data()
 
-        enforce_schema(test_collection_name, sources=sources + ["Not Allowed"])
+        enforce_schema(test_collection_name, sources=sources + ["Does not exist yet"])
         manual.write_new_data()
 
     db.drop_collection(test_collection_name)
