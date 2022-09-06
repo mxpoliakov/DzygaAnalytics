@@ -5,6 +5,12 @@ on:
       - 'main'
 env:
   MONGO_URI: ${{ secrets.MONGO_URI }}
+  PAYPAL_DIMKO_CLIENT_ID: ${{ secrets.PAYPAL_DIMKO_CLIENT_ID }}
+  PAYPAL_DIMKO_SECRET_ID: ${{ secrets.PAYPAL_DIMKO_SECRET_ID }}
+  PAYPAL_ROMAN_CLIENT_ID: ${{ secrets.PAYPAL_ROMAN_CLIENT_ID }}
+  PAYPAL_ROMAN_SECRET_ID: ${{ secrets.PAYPAL_ROMAN_SECRET_ID }}
+  MONO_JAR_DIMKO_X_TOKEN: ${{ secrets.MONO_JAR_DIMKO_X_TOKEN }}
+  MONO_JAR_DIMKO_ACCOUNT_ID: ${{ secrets.MONO_JAR_DIMKO_ACCOUNT_ID }}
 jobs:
   enforce-mongo-schema:
     name: Enforce mongo schema

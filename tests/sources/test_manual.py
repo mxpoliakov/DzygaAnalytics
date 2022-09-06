@@ -1,6 +1,7 @@
 """This module contains tests for Manual donation source"""
 from datetime import datetime
 from unittest.mock import Mock
+from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import pytest
@@ -9,12 +10,17 @@ from pymongo.errors import BulkWriteError
 from pytest import CaptureFixture
 
 from common.config import get_sources_names_list
+from common.constants import DEFAULT_USD_UAH_CONVERTION_RATE
 from common.mongo import get_database
 from mongo.enforce_schema import enforce_schema
 from sources.manual import Manual
 
 
 @patch("common.mongo.get_collection_name")
+@patch(
+    "sources.base.SourceBase.usd_to_uah_current_rate",
+    PropertyMock(return_value=DEFAULT_USD_UAH_CONVERTION_RATE),
+)
 def test_write_new_data(get_collection_name_mock: Mock, capsys: CaptureFixture) -> None:
     """This is an E2E test for Manual source. We test if we can write the data
     from a csv file to the collection.
