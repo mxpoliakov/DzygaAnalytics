@@ -7,38 +7,76 @@ Dzyga's Paw is a charity fund supplying the Ukrainian military with high-tech eq
 The service currently consists of one [Google Cloud Platform (GCP) function](https://cloud.google.com/functions/docs/console-quickstart) that is scheduled to run every hour by a [Cloud Scheduler](https://cloud.google.com/scheduler). For each donation source, the function finds the latest available entry in the database and searches for all transactions using APIs between the last entry datetime and the current datetime. Newly found donations are stored in the database.
 Also, it is possible to scrape the transactions from the donation account creation date. In this case, multiple function runs may be needed to get to real-time (most APIs support getting the transaction info for up to 30 days).
 
-The following data is stored in a common format in the database:
- - `senderName` - Sender name
- - `senderNameCensored` - Censored sender name (to display in the public dashboard)
- - `senderEmail` - Sender email
- - `currency` - Currency
- - `senderNote` - Sender note
- - `donationSource` - Donation source
- - `amountUSD` - Donation amount in USD
- - `amountOriginal` - Donation amount in original currency (if not USD)
+The following data is stored in a standard format in the database:
+
+- `senderName` - Sender name
+- `senderNameCensored` - Censored sender name (to display in the public dashboard)
+- `senderEmail` - Sender email
+- `currency` - Currency
+- `senderNote` - Sender note
+- `donationSource` - Donation source
+- `amountUSD` - Donation amount in USD
+- `amountOriginal` - Donation amount in original currency (if not USD)
 
 ## Supported donation sources
 
 ### PayPal
 
-PayPal is the most popular way to receive foreign donations for small Ukrainian charity foundations. Only personal PayPal accounts are currently supported. The transactions are retrieved using [Transaction Search API](https://developer.paypal.com/docs/api/transaction-search/v1/). Multiple currencies are supported as well. 
+PayPal is the most popular way to receive foreign donations for small Ukrainian charity foundations. Only personal PayPal accounts are currently supported. The transactions are retrieved using [Transaction Search API](https://developer.paypal.com/docs/api/transaction-search/v1/). Multiple currencies are supported as well.
 
-### Monobank Jar
+### Monobank
 
-Monobank Jar is a simple way to receive domestic Ukrainian donations. International card payments are also available. Currently, only UAH accounts are supported for analytics. [This](https://api.monobank.ua/docs/#tag/Kliyentski-personalni-dani/paths/~1personal~1statement~1{account}~1{from}~1{to}/get) API route is used (reference is in Ukrainian). 
+Monobank is a simple way to receive domestic Ukrainian donations. International card payments are also available. [This](https://api.monobank.ua/docs/#tag/Kliyentski-personalni-dani/paths/~1personal~1statement~1{account}~1{from}~1{to}/get) API route is used (In Ukrainian). Both card accounts and jars should be supported, although only jar automation is used at Dzyga's Paw.
 
 ### Manual update from CSV file
 
-It is also possible to upload transactions manually using a CSV file. This is useful to track yet unsupported donation sources or cash. The reference CSV file is located [here]( https://github.com/mxpoliakov/DzygaAnalytics/blob/main/tests/test_data/sample.csv).
+It is also possible to upload transactions manually using a CSV file. This is useful to track yet unsupported donation sources or cash. The reference CSV file is located [here](https://github.com/mxpoliakov/DzygaAnalytics/blob/main/tests/test_data/sample.csv).
 
 ## Setup
 
 ### Config
 
-### Secrets
+The service setup happens mainly in the [`config.yml`](https://github.com/mxpoliakov/DzygaAnalytics/blob/main/config.yml) file. The file contains MongoDB's settings, donation sources, and environment variables definitions that have secrets.
 
+### Secrets
+To run the service, the following secrets are required for each donation source and database connection:
+
+- MongoDB
+    - `MONGO_URI`
+- PayPal
+    - `CLIENT_ID`
+    - `SECRET_ID`
+- Monobank
+    - `X_TOKEN`
+    - `ACCOUNT_ID`
+
+Secrets are stored securely on Github in environment secrets. 
 ### Running locally
+Assuming that secrets are stored locally in the `.env` file `creds.env`, we can run an automatic update job:
+
+```
+source creds.env
+pip install -r requirements.txt
+python main.py
+```
+
+To do the manual update from the CSV:
+
+```
+python mongo/update_manual.py -d "My Source" -f my_source_dump.csv 
+```
 
 ### Deployment to GCP
 
+The service gets deployed to GCP as a cloud function using corresponding [Github Action](https://github.com/google-github-actions/deploy-cloud-functions) on each commit in the `main` branch. 
+
 ### Testing
+The tests are primarily e2e and use real database and API responses. Thus credentials are needed:
+
+```
+pip install -r requirements-dev.txt
+source creds.env
+pytest .
+```
+
+On each commit in the PR, automatic testing, code style, and linting actions are run. 
