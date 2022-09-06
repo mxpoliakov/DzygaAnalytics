@@ -13,13 +13,6 @@ from mongo.enforce_schema import enforce_schema
 from sources.paypal import PayPal
 
 
-def test_convert_currency() -> None:
-    """Tests currency_converter package"""
-    paypal = PayPal("Dimko's PayPal")
-    assert paypal.convert_currency(10, "EUR", datetime(2022, 8, 20)) == 10.04
-    assert paypal.convert_currency(10, "USD", datetime(2022, 8, 20)) == 10
-
-
 @pytest.mark.parametrize("name", ["Dimko's PayPal", "Roman's PayPal"])
 def test_get_access_token(name) -> None:
     """Tests if can get access token for all PayPal accounts specified in config file"""

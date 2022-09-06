@@ -12,3 +12,7 @@ def update_dashboard(*args, **kwargs) -> None:
 
     for source_dict in get_sources("Monobank"):
         Monobank(source_dict["name"]).write_new_data()
+
+
+if __name__ == "__main__":
+    update_dashboard()

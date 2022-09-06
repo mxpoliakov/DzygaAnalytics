@@ -4,15 +4,12 @@ from datetime import datetime
 
 import pandas as pd
 import requests
-from currency_converter import ECB_URL
-from currency_converter import CurrencyConverter
 
 from common.config import get_sources
+from common.constants import ALLOWED_PAYPAL_TRANSACTIONS_TYPES
+from common.constants import MAX_PAYPAL_TRANSACTIONS
+from common.constants import PAYPAL_ENDPOINT_URL
 from sources.base import SourceBase
-
-PAYPAL_ENDPOINT_URL = "https://api-m.paypal.com/v1"
-ALLOWED_TRANSACTIONS_TYPES = ["T0000", "T0011"]
-MAX_PAYPAL_TRANSACTIONS = 500
 
 
 class PayPal(SourceBase):
@@ -27,33 +24,6 @@ class PayPal(SourceBase):
     donation_source : str
         The donation source name
     """
-
-    def __init__(self, donation_source: str):
-        super().__init__(donation_source)
-        self.currency_converter = CurrencyConverter(
-            ECB_URL, fallback_on_missing_rate=True, fallback_on_wrong_date=True
-        )
-
-    def convert_currency(self, value: float, currency: str, date: datetime) -> float:
-        """Convert currency into USD
-
-        Parameters
-        ----------
-        value : float
-            Transaction value
-        currency : str
-            Currency 3-letter code. For example, EUR
-        date : datetime
-            The transaction datetime
-
-        Returns
-        -------
-        float
-            Converted USD value
-        """
-        if currency != "USD":
-            return round(self.currency_converter.convert(value, currency, "USD", date=date), 2)
-        return value
 
     def get_access_token(self) -> str:
         """Fetches a temp access token for PayPal API.
@@ -121,7 +91,7 @@ class PayPal(SourceBase):
             transaction_info = transaction["transaction_info"]
             code = transaction_info["transaction_event_code"]
             net = float(transaction_info["transaction_amount"]["value"])
-            if code in ALLOWED_TRANSACTIONS_TYPES and net > 0:
+            if code in ALLOWED_PAYPAL_TRANSACTIONS_TYPES and net > 0:
                 payer_info = transaction["payer_info"]
                 if payer_info["email_address"] in account_emails:
                     # Avoid including payments between our PayPal accounts
@@ -134,7 +104,6 @@ class PayPal(SourceBase):
                     {
                         "senderName": payer_info["payer_name"]["alternate_full_name"],
                         "senderEmail": payer_info["email_address"],
-                        "amountUSD": self.convert_currency(net, currency, transaction_dt),
                         "amountOriginal": net,
                         "currency": currency,
                         "datetime": transaction_dt,

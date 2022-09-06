@@ -5,12 +5,8 @@ from datetime import datetime
 import pandas as pd
 import requests
 
+from common.constants import MONOBANK_ENDPOINT_URL
 from sources.base import SourceBase
-
-MONOBANK_ENDPOINT_URL = "https://api.monobank.ua"
-UAH_CODE = 980
-USD_CODE = 840
-DEFAULT_CONVERTION_RATE = 40.0
 
 
 class Monobank(SourceBase):
@@ -24,27 +20,6 @@ class Monobank(SourceBase):
     donation_source : str
         The donation source name
     """
-
-    def get_usd_to_uah_current_rate(self) -> float:
-        """currency_converter package does not support UAH,
-        so we query Monobank for USD / UAH rate.
-
-        Returns
-        -------
-        float
-            Returns USD / UAH rate for the current datetime.
-        """
-        response = requests.get(
-            f"{MONOBANK_ENDPOINT_URL}/bank/currency",
-            headers={"Content-Type": "application/json"},
-        )
-        assert response.status_code == requests.codes["ok"], response.text
-        response = json.loads(response.text)
-
-        for rate_info in response:
-            if rate_info["currencyCodeA"] == USD_CODE and rate_info["currencyCodeB"] == UAH_CODE:
-                return rate_info["rateSell"]
-        return DEFAULT_CONVERTION_RATE
 
     def get_api_data(self) -> pd.DataFrame:
         account_id = self.source_config["account_id"]
@@ -63,7 +38,7 @@ class Monobank(SourceBase):
         response = json.loads(response.text)
 
         rows = []
-        rate = self.get_usd_to_uah_current_rate()
+
         transactions = response[::-1]  # Reverse list
         if not self.is_source_creation_date:
             # Skip first transaction returned, because it is already stored in the database.
@@ -72,21 +47,18 @@ class Monobank(SourceBase):
         for transaction in transactions:
             # Transaction amount is encoded as int with decimals
             amount = transaction["amount"] / 100
-            converted_amount = round(amount / rate, 2)
-            if converted_amount > 0:
+            if amount > 0:
                 try:
                     name = transaction["description"].split("Від: ")[1]
                 except IndexError:
                     name = "🐈"
 
-                assert transaction["currencyCode"] == UAH_CODE, "Only UAH accounts are supported"
                 rows.append(
                     {
                         "senderName": name if name != "🐈" else None,
                         "senderEmail": None,
-                        "amountUSD": converted_amount,
                         "amountOriginal": amount,
-                        "currency": "UAH",
+                        "currency": self.source_config["currency"],
                         "datetime": datetime.utcfromtimestamp(transaction["time"]),
                         "senderNote": transaction.get("comment", ""),
                     }

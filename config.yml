@@ -24,6 +24,7 @@ sources:
     type: Monobank
     account_id: ${MONO_JAR_DIMKO_ACCOUNT_ID}
     x_token: ${MONO_JAR_DIMKO_X_TOKEN}
+    currency: UAH
     creation_date: 2022-07-01T00:00:00
   - 
     name: Dimko's Wise
