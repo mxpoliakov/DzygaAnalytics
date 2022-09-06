@@ -1,5 +1,6 @@
 """This module contains base class for donation source"""
 import json
+import time
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
@@ -61,6 +62,34 @@ class SourceBase(ABC):
         )
 
     @classmethod
+    def get_request_with_rate_limiting(cls, url: str, headers: dict[str | str]) -> dict:
+        """Get request which waits 60 seconds and retries in case of hitting rate limit.
+
+        Parameters
+        ----------
+        url : str
+            URL to request
+        headers : dict[str | str]
+            Headers dictonary for request
+
+        Returns
+        -------
+        dict
+            Raw API response
+        """
+        response = requests.get(url, headers=headers)
+        try:
+            assert response.status_code == requests.codes["ok"], response.text
+        except AssertionError:
+            if response.status_code == requests.codes["too_many"]:
+                time.sleep(60)
+                response = requests.get(url, headers=headers)
+            else:
+                raise
+        response = json.loads(response.text)
+        return response
+
+    @classmethod
     @property
     @cache
     def usd_to_uah_current_rate(cls) -> float:
@@ -74,12 +103,9 @@ class SourceBase(ABC):
         float
             Returns USD / UAH rate for the current datetime.
         """
-        response = requests.get(
-            f"{MONOBANK_ENDPOINT_URL}/bank/currency",
-            headers={"Content-Type": "application/json"},
-        )
-        assert response.status_code == requests.codes["ok"], response.text
-        response = json.loads(response.text)
+        url = f"{MONOBANK_ENDPOINT_URL}/bank/currency"
+        headers = {"Content-Type": "application/json"}
+        response = cls.get_request_with_rate_limiting(url, headers)
 
         for rate_info in response:
             if rate_info["currencyCodeA"] == USD_CODE and rate_info["currencyCodeB"] == UAH_CODE:

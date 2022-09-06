@@ -1,8 +1,10 @@
 """This module contains tests for GCP Cloud Function entrypoint"""
+from unittest.mock import PropertyMock
 from unittest.mock import call
 from unittest.mock import patch
 
 from common.config import get_sources
+from common.constants import DEFAULT_USD_UAH_CONVERTION_RATE
 from main import update_dashboard
 from sources.monobank import Monobank
 from sources.paypal import PayPal
@@ -11,6 +13,10 @@ from sources.paypal import PayPal
 def test_update_dashboard() -> None:
     """Tests update_dashboard entrypoint"""
     with (
+        patch(
+            "sources.base.SourceBase.usd_to_uah_current_rate",
+            PropertyMock(return_value=DEFAULT_USD_UAH_CONVERTION_RATE),
+        ),
         patch("main.Monobank", spec=Monobank) as write_new_data_monobank_mock,
         patch("main.PayPal", spec=PayPal) as write_new_data_paypal_mock,
     ):

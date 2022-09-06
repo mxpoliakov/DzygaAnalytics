@@ -1,9 +1,7 @@
 """This module contains class for Monobank donation source"""
-import json
 from datetime import datetime
 
 import pandas as pd
-import requests
 
 from common.constants import MONOBANK_ENDPOINT_URL
 from sources.base import SourceBase
@@ -27,15 +25,11 @@ class Monobank(SourceBase):
             f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/"
             f"{int(self.start_datetime.timestamp())}/{int(self.end_datetime.timestamp())}"
         )
-        response = requests.get(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "X-Token": self.source_config["x_token"],
-            },
-        )
-        assert response.status_code == requests.codes["ok"], response.text
-        response = json.loads(response.text)
+        headers = {
+            "Content-Type": "application/json",
+            "X-Token": self.source_config["x_token"],
+        }
+        response = self.get_request_with_rate_limiting(url, headers)
 
         rows = []
 

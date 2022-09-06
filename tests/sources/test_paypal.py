@@ -27,7 +27,7 @@ def test_get_api_data_does_not_include_payments_between_accounts() -> None:
     paypal.end_datetime = datetime(2022, 8, 28)
     df = paypal.get_api_data()
     assert len(df) == 1
-    assert df["amountUSD"][0] == 50.0
+    assert df["amountOriginal"][0] == 50.0
 
 
 @patch("sources.base.datetime")

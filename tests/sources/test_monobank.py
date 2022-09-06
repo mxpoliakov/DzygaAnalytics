@@ -1,17 +1,23 @@
 """This module contains tests for Monobank donation source"""
 from datetime import datetime
 from unittest.mock import Mock
+from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import pandas as pd
 from bson import ObjectId
 
+from common.constants import DEFAULT_USD_UAH_CONVERTION_RATE
 from common.mongo import get_database
 from sources.monobank import Monobank
 
 
 @patch("sources.base.datetime")
 @patch("common.mongo.get_collection_name")
+@patch(
+    "sources.base.SourceBase.usd_to_uah_current_rate",
+    PropertyMock(return_value=DEFAULT_USD_UAH_CONVERTION_RATE),
+)
 def test_write_new_data(get_collection_name_mock: Mock, datetime_mock: Mock) -> None:
     """This is an E2E test for Monobank source. The test creates fake collection
     in the database, and mocks start and end date to write PayPal transactions
