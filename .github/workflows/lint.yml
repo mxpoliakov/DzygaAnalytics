@@ -4,13 +4,11 @@ on:
     branches:
       - 'main'
     paths:
-      - '*.py'
-      - '!README.md'
+      - '**.py'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-        - '*.py'
-        - '!README.md'
+      - '**.py'
 jobs:
   black:
     runs-on: ubuntu-latest
