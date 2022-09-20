@@ -1,4 +1,5 @@
 """This module contains class for Manual donation source"""
+import numpy as np
 import pandas as pd
 
 from sources.base import SourceBase
@@ -26,5 +27,5 @@ class Manual(SourceBase):
     def get_api_data(self) -> pd.DataFrame:
         df = pd.read_csv(self.filepath, parse_dates=["datetime"])
         df["senderNote"] = df["senderNote"].fillna("")
-        df = df.where(pd.notnull(df), None)
+        df = df.replace({np.nan: None})
         return df
