@@ -12,3 +12,9 @@ def test_convert_currency() -> None:
     usd_to_uah_rate = SourceBase.usd_to_uah_current_rate
     assert SourceBase.convert_currency(1000, "UAH", None) == round(1000 / usd_to_uah_rate, 2)
     assert SourceBase.convert_currency(100, "UAH", None) == round(100 / usd_to_uah_rate, 2)
+
+
+def test_parse_email_from_note() -> None:
+    """Tests parse_email_from_note method"""
+    assert SourceBase.parse_email_from_note("From: example@mail.com") == "example@mail.com"
+    assert SourceBase.parse_email_from_note("Hello World!") is None
