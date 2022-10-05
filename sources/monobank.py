@@ -21,9 +21,11 @@ class Monobank(SourceBase):
 
     def get_api_data(self) -> pd.DataFrame:
         account_id = self.source_config["account_id"]
+        start_datetime = int(self.start_datetime.timestamp())
+        end_datetime = int(self.end_datetime.timestamp())
         url = (
             f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/"
-            f"{int(self.start_datetime.timestamp())}/{int(self.end_datetime.timestamp())}"
+            f"{start_datetime}/{end_datetime}"
         )
         headers = {
             "Content-Type": "application/json",
@@ -34,11 +36,13 @@ class Monobank(SourceBase):
         rows = []
 
         transactions = response[::-1]  # Reverse list
-        if not self.is_source_creation_date:
-            # Skip first transaction returned, because it is already stored in the database.
-            transactions = transactions[1:]
 
         for transaction in transactions:
+            if not self.is_source_creation_date and transaction["time"] == start_datetime:
+                # Skip transaction with the same time as start_datetime,
+                # because it is already stored in the database.
+                continue
+
             # Transaction amount is encoded as int with decimals
             amount = transaction["amount"] / 100
             if amount > 0:
@@ -47,14 +51,16 @@ class Monobank(SourceBase):
                 except IndexError:
                     name = "🐈"
 
+                sender_note = transaction.get("comment", "")
                 rows.append(
                     {
                         "senderName": name if name != "🐈" else None,
-                        "senderEmail": None,
+                        "senderEmail": self.parse_email_from_note(sender_note),
                         "amountOriginal": amount,
                         "currency": self.source_config["currency"],
                         "datetime": datetime.utcfromtimestamp(transaction["time"]),
-                        "senderNote": transaction.get("comment", ""),
+                        "senderNote": sender_note,
+                        "countryCode": None,
                     }
                 )
 

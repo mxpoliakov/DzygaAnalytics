@@ -1,5 +1,6 @@
 """This module contains base class for donation source"""
 import json
+import re
 import time
 from abc import ABC
 from abc import abstractmethod
@@ -189,6 +190,26 @@ class SourceBase(ABC):
                 [word[:chars_to_keep] + "*" * len(word[chars_to_keep:]) for word in name.split()]
             )
         return ""
+
+    @classmethod
+    def parse_email_from_note(cls, sender_note: str) -> str | None:
+        """Parses email from donation note using regex.
+
+        Parameters
+        ----------
+        sender_note : str
+            A sender note to parse
+
+        Returns
+        -------
+        str | None
+            Email str if the email is found.
+            None if the email is not found.
+        """
+        match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", sender_note)
+        if match:
+            return match.group(0)
+        return None
 
     def write_df_to_collection(self, df: pd.DataFrame) -> None:
         """Writes pd.DataFrame with the API data to collection

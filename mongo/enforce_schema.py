@@ -32,6 +32,7 @@ def enforce_schema(
                 "amountOriginal",
                 "senderNote",
                 "insertionMode",
+                "countryCode",
             ],
             "properties": {
                 "senderName": {
@@ -71,6 +72,10 @@ def enforce_schema(
                     "bsonType": ["double"],
                     "minimum": 0,
                     "description": "must be a double and is required",
+                },
+                "countryCode": {
+                    "bsonType": ["string", "null"],
+                    "description": "must be a string or null and is required",
                 },
             },
         }

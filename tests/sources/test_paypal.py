@@ -66,6 +66,7 @@ def test_write_new_data(
     df = pd.DataFrame.from_dict(entries)
     assert len(df) == 4
     assert df["senderNameCensored"][0] == "St**** JP"
+    assert df["countryCode"][0] == "US"
     assert df["amountUSD"].sum() == 250.64
     assert df["donationSource"].unique()[0] == source["name"]
     assert df["insertionMode"].unique()[0] == "Auto"

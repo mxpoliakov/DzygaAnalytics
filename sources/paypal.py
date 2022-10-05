@@ -108,6 +108,7 @@ class PayPal(SourceBase):
                         "currency": currency,
                         "datetime": transaction_dt,
                         "senderNote": transaction_info.get("transaction_note", ""),
+                        "countryCode": payer_info.get("country_code", None),
                     }
                 )
         df = pd.DataFrame.from_dict(rows)
