@@ -11,15 +11,15 @@ from common.mongo import get_database
 from sources.privatbank import Privatbank
 
 
-@patch("sources.base.datetime")
 @patch("sources.base.get_source")
 @patch("common.mongo.get_collection_name")
 def test_write_new_data(
-    get_collection_name_mock: Mock, get_source_mock: Mock, datetime_mock: Mock
+    get_collection_name_mock: Mock,
+    get_source_mock: Mock,
 ) -> None:
     """This is an E2E test for Privatbank source. The test creates fake collection
     in the database, and mocks start and end date to write Privatbank transactions
-    from real account between 2022-09-01 to 2022-09-30.
+    from real account between 2022-09-01 to current datetime.
 
     Parameters
     ----------
@@ -27,11 +27,7 @@ def test_write_new_data(
         A mock to swap collection name from config names to the test one.
     get_source_mock : Mock
         A mock to swap account creation date from config names to the test one.
-    datetime_mock : Mock
-        A mock to fake current datetime.
     """
-    datetime_mock.utcnow = Mock(return_value=datetime(2022, 9, 30))
-    datetime_mock.fromisoformat = datetime.fromisoformat
     source = get_source("Dzyga's Paw Charity Accounts")
     source["creation_date"] = datetime(2022, 9, 1)
     get_source_mock.return_value = source
@@ -44,7 +40,7 @@ def test_write_new_data(
     privatbank.write_new_data()
     entries = list(db.get_collection(test_collection_name).find({}))
     df = pd.DataFrame.from_dict(entries)
-    assert len(df) == 49
+    assert len(df) > 1
     assert df["senderNameCensored"][0] == "AL******* WI********"
     assert df["amountUSD"][0] == 508.90
     assert df["donationSource"].unique()[0] == source["name"]
