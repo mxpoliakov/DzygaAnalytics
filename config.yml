@@ -27,12 +27,9 @@ sources:
     currency: UAH
     creation_date: 2022-07-01T00:00:00
   - 
-    name: Dimko's Wise
-    type: Manual
-    creation_date: 2022-05-01T00:00:00
-  - 
     name: Dzyga's Paw Charity Accounts
-    type: Manual
+    type: Privatbank
+    token: ${PRIVATBANK_TOKEN}
     creation_date: 2022-07-20T00:00:00
   - 
     name: Other

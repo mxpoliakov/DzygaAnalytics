@@ -17,6 +17,7 @@ env:
   PAYPAL_ROMAN_SECRET_ID: ${{ secrets.PAYPAL_ROMAN_SECRET_ID }}
   MONO_JAR_DIMKO_X_TOKEN: ${{ secrets.MONO_JAR_DIMKO_X_TOKEN }}
   MONO_JAR_DIMKO_ACCOUNT_ID: ${{ secrets.MONO_JAR_DIMKO_ACCOUNT_ID }}
+  PRIVATBANK_TOKEN: ${{ secrets.PRIVATBANK_TOKEN }}
 jobs:
   pytest:
     runs-on: ubuntu-latest
