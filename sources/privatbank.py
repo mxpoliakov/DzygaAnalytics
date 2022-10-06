@@ -54,7 +54,7 @@ class Privatbank(SourceBase):
                     country_code = "UA"
                 else:
                     if sender_note.split()[0] != "From":
-                        # SWIFT transaction are duplicated.
+                        # SWIFT transactions are duplicated.
                         # One of them always has 'From' as the first word.
                         continue
                     name = " ".join(sender_note.split()[1:3]).replace("1/", "")
