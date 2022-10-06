@@ -19,6 +19,7 @@ The following data is stored in a standard format in the database:
 - `donationSource` - Donation source
 - `amountUSD` - Donation amount in USD
 - `amountOriginal` - Donation amount in original currency (if not USD)
+- `countryCode` - Sender country code. 
 
 ## Supported donation sources
 
@@ -29,6 +30,10 @@ PayPal is the most popular way to receive foreign donations for small Ukrainian 
 ### Monobank
 
 Monobank is a simple way to receive domestic Ukrainian donations. International card payments are also available. [This](https://api.monobank.ua/docs/#tag/Kliyentski-personalni-dani/paths/~1personal~1statement~1{account}~1{from}~1{to}/get) API route is used (In Ukrainian). Both card accounts and jars should be supported, although only [jar](https://send.monobank.ua/jar/m852imZ2q) automation is used at Dzyga's Paw.
+
+### Privatbank
+
+Dzyga's Paw official IBAN accounts use Privatbank to receive SWIFT payments. Privatbank's corporate API is used to retrieve these transactions. 
 
 ### Manual update from CSV file
 
@@ -51,6 +56,8 @@ To run the service, the following secrets are required for each donation source 
 - Monobank
     - `X_TOKEN`
     - `ACCOUNT_ID`
+- Privatbank
+    - `TOKEN`
 
 Secrets are stored securely on Github in environment secrets. 
 
