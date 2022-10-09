@@ -98,7 +98,7 @@ class PayPal(SourceBase):
                     continue
                 currency = transaction_info["transaction_amount"]["currency_code"]
                 transaction_dt = datetime.fromisoformat(
-                    transaction_info["transaction_initiation_date"].split("+")[0]
+                    transaction_info["transaction_updated_date"].split("+")[0]
                 )
                 rows.append(
                     {
