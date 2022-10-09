@@ -220,7 +220,7 @@ class SourceBase(ABC):
             pd.DataFrame with the API data
         """
         start_datetime = self.start_datetime
-        end_datetime = self.end_datetime.replace(microsecond=0)
+        end_datetime = self.end_datetime.replace(microsecond=0) if self.end_datetime else None
         base_str = f"{start_datetime} - {end_datetime} | {self.donation_source} |"
         if not df.empty:
             df["donationSource"] = self.donation_source
