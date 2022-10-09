@@ -219,8 +219,9 @@ class SourceBase(ABC):
         df : pd.DataFrame
             pd.DataFrame with the API data
         """
-
-        base_str = f"{self.start_datetime} - {self.end_datetime} | {self.donation_source} |"
+        start_datetime = self.start_datetime
+        end_datetime = self.end_datetime.replace(microsecond=0) if self.end_datetime else None
+        base_str = f"{start_datetime} - {end_datetime} | {self.donation_source} |"
         if not df.empty:
             df["donationSource"] = self.donation_source
             df["insertionMode"] = self.insertion_mode

@@ -1,5 +1,6 @@
 """This module contains class for Monobank donation source"""
 from datetime import datetime
+from datetime import timezone
 
 import pandas as pd
 
@@ -21,8 +22,8 @@ class Monobank(SourceBase):
 
     def get_api_data(self) -> pd.DataFrame:
         account_id = self.source_config["account_id"]
-        start_datetime = int(self.start_datetime.timestamp())
-        end_datetime = int(self.end_datetime.timestamp())
+        start_datetime = int(self.start_datetime.replace(tzinfo=timezone.utc).timestamp())
+        end_datetime = int(self.end_datetime.replace(tzinfo=timezone.utc).timestamp())
         url = (
             f"{MONOBANK_ENDPOINT_URL}/personal/statement/{account_id}/"
             f"{start_datetime}/{end_datetime}"
@@ -36,7 +37,6 @@ class Monobank(SourceBase):
         rows = []
 
         transactions = response[::-1]  # Reverse list
-
         for transaction in transactions:
             if not self.is_source_creation_date and transaction["time"] == start_datetime:
                 # Skip transaction with the same time as start_datetime,
@@ -58,7 +58,7 @@ class Monobank(SourceBase):
                         "senderEmail": self.parse_email_from_note(sender_note),
                         "amountOriginal": amount,
                         "currency": self.source_config["currency"],
-                        "datetime": datetime.utcfromtimestamp(transaction["time"]),
+                        "datetime": datetime.fromtimestamp(transaction["time"], tz=timezone.utc),
                         "senderNote": sender_note,
                         "countryCode": None,
                     }
