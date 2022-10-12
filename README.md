@@ -4,6 +4,9 @@ Dzyga's Paw is Ukrainian charity fund supplying the Ukrainian military with high
 
 You can learn more about Dzyga's Paw as charity [here](https://dzygaspaw.com), and you can support Ukrainian fight for freedom at [the support page](https://dzygaspaw.com/support).
 
+![Donations over time (daily)](chart.png "Donations over time (daily)")
+
+
 ## How does it work?
 
 The service currently consists of one [Google Cloud Platform (GCP) function](https://cloud.google.com/functions/docs/console-quickstart) that is scheduled to run every hour by a [Cloud Scheduler](https://cloud.google.com/scheduler). For each donation source, the function finds the latest available entry in the database and searches for all transactions using APIs between the last entry datetime and the current datetime. Then, newly found donations are stored in the database.
