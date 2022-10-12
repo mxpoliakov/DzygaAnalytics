@@ -5,6 +5,7 @@ on:
       - 'main'
     paths-ignore:
       - 'README.md'
+      - 'chart.png'
 env:
   MONGO_URI: ${{ secrets.MONGO_URI }}
   PAYPAL_DIMKO_CLIENT_ID: ${{ secrets.PAYPAL_DIMKO_CLIENT_ID }}
